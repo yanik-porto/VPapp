@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/**
+ * Constructor and Destructor
+ */
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -10,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     delay(10)
 {
     ui->setupUi(this);
+    screen = QApplication::desktop()->screenGeometry();cout<<screen.height()<<endl;
+    this->setGeometry(0,0,screen.width()/2-68,screen.height());
 
     procEng = new processEngine;
     QObject::connect(procEng,SIGNAL(ImgReadyIn()),this,SLOT(Display_inImg()));
@@ -23,27 +29,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_open_clicked()
-{
-    //Get path to image and read image into cv matrix
-    QString filename = QFileDialog::getOpenFileName();
-    I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
-    procEng->loadImg(filename);
-}
-
-void MainWindow::on_pushButton_webcam_clicked()
-{
-    Mat frame,flipped,resized,img,blurred,edges;
-    int ch,delay=10;
-
-    while(cap.read(frame))
-    {
-        ch = show_cv("Input", frame, delay);
-//        Canny(frame, edges, 50, 150);
-//        ch = show_cv("Canny",edges,delay);
-        if (ch == 27) break;
-    }
-}
+/**
+ * Function for displaying images
+ */
 
 int MainWindow::show_cv(const String &winname,const Mat &image, const int &delay)
 {
@@ -54,31 +42,20 @@ int MainWindow::show_cv(const String &winname,const Mat &image, const int &delay
     return ch;
 }
 
-
-
-void MainWindow::on_pushButton_stopcam_clicked()
-{
-    if(cap.isOpened())
-    {
-        cap.release();
-    }
-}
-
-void MainWindow::on_pushButton_reset_clicked()
-{
-    procEng->addProcess("Reset");
-}
+/**
+ * Slots called by processengine class signals
+ */
 
 void MainWindow::Display_inImg()
 {
     show_cv(inFrame,procEng->get_originalImg(),delay);
-    cv::moveWindow(inFrame,QApplication::desktop()->screenGeometry().width()/2,0);
+    cv::moveWindow(inFrame,screen.width()/2,0);
 }
 
 void MainWindow::Display_outImg()
 {
     show_cv(outFrame,procEng->get_processedImg(),delay);
-    cv::moveWindow(outFrame,QApplication::desktop()->screenGeometry().width()/2,QApplication::desktop()->screenGeometry().height()/2);
+    cv::moveWindow(outFrame,screen.width()/2,screen.height()/2);
 }
 
 void MainWindow::Disable_widgets()
@@ -103,6 +80,52 @@ void MainWindow::Disable_widgets()
 
 }
 
+
+/**
+ * Slots for buttons opening frames or live stream (main actions)
+ */
+
+void MainWindow::on_pushButton_open_clicked()
+{
+    //Get path to image and read image into cv matrix
+    QString filename = QFileDialog::getOpenFileName();
+    I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
+    procEng->loadImg(filename);
+}
+
+void MainWindow::on_pushButton_webcam_clicked()
+{
+    Mat frame,flipped,resized,img,blurred,edges;
+    int ch,delay=10;
+
+    while(cap.read(frame))
+    {
+        ch = show_cv("Input", frame, delay);
+//        Canny(frame, edges, 50, 150);
+//        ch = show_cv("Canny",edges,delay);
+        if (ch == 27) break;
+    }
+}
+
+
+void MainWindow::on_pushButton_stopcam_clicked()
+{
+    if(cap.isOpened())
+    {
+        cap.release();
+    }
+}
+
+void MainWindow::on_pushButton_reset_clicked()
+{
+    procEng->addProcess("Reset");
+}
+
+
+/**
+ * Slots called by buttons applying a process on the image
+ */
+
 void MainWindow::on_pushButton_Blur_clicked()
 {
     procEng->addProcess("Blur");
@@ -110,7 +133,19 @@ void MainWindow::on_pushButton_Blur_clicked()
 
 void MainWindow::on_pushButton_flip_clicked()
 {
-    procEng->addProcess("Flip");
+    int flipCode = 10;
+    bool horiz = ui->checkBox_horiz->isChecked();
+    bool vert = ui->checkBox_vert->isChecked();
+
+    if(horiz&&vert)
+        flipCode = -1;
+    else if(horiz&&!vert)
+        flipCode = 1;
+    else if(!horiz&&vert)
+        flipCode = 0;
+
+    if(flipCode!=10)
+        procEng->addProcess("Flip",flipCode);
 }
 
 void MainWindow::on_listWidget_activated(const QModelIndex &index)
@@ -157,7 +192,9 @@ void MainWindow::on_pushButton_eq_clicked()
 
 void MainWindow::on_pushButton_resize_clicked()
 {
-    procEng->addProcess("Resize");
+    int height = ui->lineEdit_height->text().toInt();
+    int width = ui->lineEdit_width->text().toInt();
+    procEng->addProcess( "Resize", height, width );
 }
 
 
@@ -199,4 +236,14 @@ void MainWindow::on_pushButton_harris_clicked()
 void MainWindow::on_pushButton_surf_clicked()
 {
     procEng->addProcess("SURF");
+}
+
+void MainWindow::on_pushButton_sift_clicked()
+{
+    procEng->addProcess("SIFT");
+}
+
+void MainWindow::on_pushButton_fast_clicked()
+{
+    procEng->addProcess("FAST");
 }

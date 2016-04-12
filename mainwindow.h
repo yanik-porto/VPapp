@@ -29,11 +29,17 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+
+    /**
+     * constructor and mutators
+     */
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 private:
     Ui::MainWindow *ui;
+
+    QRect screen;
 
     int show_cv(const String &winname, const Mat &image, const int &delay);
 
@@ -48,9 +54,19 @@ private:
     int delay;
 
 private slots:
+    /**
+     * Slot called from signal of processengine class
+     */
+
     void Display_inImg();
+
     void Display_outImg();
+
     void Disable_widgets();
+
+    /**
+     * Slots for widget actions
+     */
 
     void on_pushButton_open_clicked();
 
@@ -93,6 +109,10 @@ private slots:
     void on_pushButton_harris_clicked();
 
     void on_pushButton_surf_clicked();
+
+    void on_pushButton_sift_clicked();
+
+    void on_pushButton_fast_clicked();
 
 public slots:
 

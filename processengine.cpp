@@ -26,8 +26,12 @@ void processEngine::changeToGray()
     }
 }
 
-void processEngine::addProcess(const QString &str)
+void processEngine::addProcess(const QString &str, ...)
 {
+
+    va_list args;
+    va_start(args, str);
+
     //Maybe move later on
     if(str.compare("Reset")==0)
     {
@@ -41,7 +45,8 @@ void processEngine::addProcess(const QString &str)
 
     if(str.compare("Flip")==0)
     {
-      cv::flip(outI, outI, 1);
+      int flipCode = va_arg( args, int );
+      cv::flip( outI, outI, flipCode );
     }
 
     if(str.compare("Erode")==0)
@@ -96,7 +101,9 @@ void processEngine::addProcess(const QString &str)
 
     if(str.compare("Resize")==0)
     {
-        cv::Size size(100,100);
+        int height = va_arg( args, int );
+        int width = va_arg( args, int );
+        cv::Size size( width, height );
         cv::resize(outI,outI,size);
     }
 
@@ -238,7 +245,37 @@ void processEngine::addProcess(const QString &str)
 
     if(str.compare("SURF")==0)
     {
-//        cv::Ptr<SURF> detector =
+        int minHessian = 400;
+        cv::Ptr<SURF> detector = SURF::create( minHessian );
+
+        vector<cv::KeyPoint> keypoints;
+        detector->detect( outI, keypoints );
+
+        cv::drawKeypoints(outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+
+    }
+
+    if(str.compare("SIFT")==0)
+    {
+        cv::Ptr<cv::Feature2D> f2d = SIFT::create();
+
+        vector<cv::KeyPoint> keypoints;
+        f2d->detect( outI, keypoints );
+
+        cv::drawKeypoints( outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+
+    }
+
+    if(str.compare("FAST")==0)
+    {
+        cv::Mat outI_gray;
+        cv::cvtColor(outI, outI_gray, CV_BGR2GRAY);
+
+        int thresh = 9;
+        vector<cv::KeyPoint> keypoints;
+        cv::FAST(outI_gray, keypoints, thresh, true);
+
+        cv::drawKeypoints( outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
     }
 
     ImgReadyOut();
@@ -258,15 +295,15 @@ void processEngine::displayHist()
    getHistogram(outI, histImage);
 
    /// Display
-    cv::namedWindow("calcHist Demo1", CV_WINDOW_AUTOSIZE );
+    cv::namedWindow("calcHist Demo1", CV_WINDOW_KEEPRATIO );
     cv::imshow("calcHist Demo1", histImage[0] );
     cv::waitKey(10);
 
-    cv::namedWindow("calcHist Demo2", CV_WINDOW_AUTOSIZE );
+    cv::namedWindow("calcHist Demo2", CV_WINDOW_KEEPRATIO );
     cv::imshow("calcHist Demo2", histImage[1] );
     cv::waitKey(10);
 
-    cv::namedWindow("calcHist Demo3", CV_WINDOW_AUTOSIZE );
+    cv::namedWindow("calcHist Demo3", CV_WINDOW_KEEPRATIO );
     cv::imshow("calcHist Demo3", histImage[2] );
     cv::waitKey(10);
 }

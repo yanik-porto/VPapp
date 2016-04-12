@@ -10,9 +10,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
 
 using namespace std;
+using namespace cv::xfeatures2d;
 
 class processEngine : public QObject
 {
@@ -22,7 +24,7 @@ public:
     ~processEngine();
 
     void loadImg(const QString &filename);
-    void addProcess(const QString &str);
+    void addProcess(const QString &str, ...);
     void displayHist();
     const cv::Mat &get_processedImg() const {return outI;}
     const cv::Mat &get_originalImg() const {return inI;}

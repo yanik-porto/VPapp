@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>514</height>
+    <width>732</width>
+    <height>900</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>732</width>
+    <height>900</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -69,10 +75,10 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>130</y>
-      <width>351</width>
-      <height>301</height>
+      <x>180</x>
+      <y>140</y>
+      <width>341</width>
+      <height>281</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -82,70 +88,209 @@
      <attribute name="title">
       <string>Basics</string>
      </attribute>
-     <widget class="QPushButton" name="pushButton_flip">
+     <widget class="QGroupBox" name="groupBox_resize">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>10</y>
-        <width>99</width>
-        <height>27</height>
+        <x>137</x>
+        <y>9</y>
+        <width>141</width>
+        <height>122</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Flip</string>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
       </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_sp">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>50</y>
-        <width>111</width>
-        <height>27</height>
-       </rect>
+      <property name="autoFillBackground">
+       <bool>false</bool>
       </property>
-      <property name="text">
-       <string>Salt and Pepper</string>
+      <property name="styleSheet">
+       <string notr="true">QGroupBox {
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+}</string>
       </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_resize">
-      <property name="geometry">
-       <rect>
-        <x>130</x>
-        <y>50</y>
-        <width>99</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
+      <property name="title">
        <string>Resize</string>
       </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="2" column="0" colspan="2">
+        <widget class="QPushButton" name="pushButton_resize">
+         <property name="text">
+          <string>Resize</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_width">
+         <property name="text">
+          <string>width</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEdit_width">
+         <property name="text">
+          <string>100</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_height">
+         <property name="text">
+          <string>height</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="lineEdit_height">
+         <property name="text">
+          <string>100</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
-     <widget class="QPushButton" name="pushButton_hist">
+     <widget class="QGroupBox" name="groupBox_flip">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>100</y>
-        <width>99</width>
-        <height>27</height>
+        <x>9</x>
+        <y>9</y>
+        <width>122</width>
+        <height>112</height>
        </rect>
       </property>
-      <property name="text">
+      <property name="styleSheet">
+       <string notr="true">QGroupBox {
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+}</string>
+      </property>
+      <property name="title">
+       <string>Flip</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="checkBox_horiz">
+         <property name="text">
+          <string>Horizontal</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkBox_vert">
+         <property name="text">
+          <string>Vertical</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButton_flip">
+         <property name="text">
+          <string>Flip</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_hist">
+      <property name="geometry">
+       <rect>
+        <x>137</x>
+        <y>137</y>
+        <width>105</width>
+        <height>89</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QGroupBox {
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+}</string>
+      </property>
+      <property name="title">
        <string>Histogram</string>
       </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pushButton_eq">
+         <property name="text">
+          <string>Equalize</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="pushButton_hist">
+         <property name="text">
+          <string>Display</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
-     <widget class="QPushButton" name="pushButton_eq">
+     <widget class="QGroupBox" name="groupBox_noise">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>100</y>
-        <width>99</width>
-        <height>27</height>
+        <x>9</x>
+        <y>137</y>
+        <width>105</width>
+        <height>56</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Equalize</string>
+      <property name="styleSheet">
+       <string notr="true">QGroupBox {
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+}</string>
       </property>
+      <property name="title">
+       <string>Noise</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pushButton_sp">
+         <property name="text">
+          <string>S and P</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
@@ -420,13 +565,73 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QLabel" name="label_histR">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>530</y>
+      <width>211</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel
+{border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_histG">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>530</y>
+      <width>211</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel
+{border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_histB">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>530</y>
+      <width>211</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel
+{border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>532</width>
+     <width>732</width>
      <height>25</height>
     </rect>
    </property>
