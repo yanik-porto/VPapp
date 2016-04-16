@@ -78,8 +78,6 @@ private slots:
 
     void on_pushButton_flip_clicked();
 
-    void on_listWidget_activated(const QModelIndex &index);
-
     void on_pushButton_sp_clicked();
 
     void on_pushButton_logo_clicked();
@@ -113,6 +111,16 @@ private slots:
     void on_pushButton_sift_clicked();
 
     void on_pushButton_fast_clicked();
+
+    void on_pushButton_morph_clicked();
+
+    void on_horizontalSlider_harrisThresh_sliderMoved(int position);
+
+    void on_horizontalSlider_SURFThresh_sliderMoved(int position);
+
+    void on_horizontalSlider_SIFTThresh_sliderMoved(int position);
+
+    void on_horizontalSlider_FASTThresh_sliderMoved(int position);
 
 public slots:
 

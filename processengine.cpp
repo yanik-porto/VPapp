@@ -40,7 +40,8 @@ void processEngine::addProcess(const QString &str, ...)
 
     if(str.compare("Blur")==0)
     {
-      cv::blur(outI, outI, cv::Size(11, 11));
+      int sizeKernel = va_arg( args, int );
+      cv::blur( outI, outI, cv::Size( sizeKernel, sizeKernel ) );
     }
 
     if(str.compare("Flip")==0)
@@ -51,26 +52,30 @@ void processEngine::addProcess(const QString &str, ...)
 
     if(str.compare("Erode")==0)
     {
-        cv::Mat	element(7,7,CV_8U,cv::Scalar(1));
-        cv::erode(outI,outI,element);
+        int sizeElmt = va_arg( args, int );
+        cv::Mat	element( sizeElmt, sizeElmt, CV_8U,cv::Scalar(1) );
+        cv::erode( outI, outI, element );
     }
 
     if(str.compare("Dilate")==0)
     {
-        cv::Mat	element(7,7,CV_8U,cv::Scalar(1));
+        int sizeElmt = va_arg( args, int );
+        cv::Mat	element( sizeElmt, sizeElmt, CV_8U, cv::Scalar(1) );
         cv::dilate(outI,outI,element);
     }
 
     if(str.compare("Open")==0)
     {
-        cv::Mat	element5(5,5,CV_8U,cv::Scalar(1));
-        cv::morphologyEx(outI,outI,cv::MORPH_OPEN,element5);
+        int sizeElmt = va_arg( args, int );
+        cv::Mat	element( sizeElmt, sizeElmt, CV_8U,cv::Scalar(1) );
+        cv::morphologyEx(outI,outI,cv::MORPH_OPEN,element);
     }
 
     if(str.compare("Close")==0)
     {
-        cv::Mat	element5(5,5,CV_8U,cv::Scalar(1));
-        cv::morphologyEx(outI,outI,cv::MORPH_CLOSE,element5);
+        int sizeElmt = va_arg( args, int );
+        cv::Mat	element( sizeElmt, sizeElmt, CV_8U,cv::Scalar(1) );
+        cv::morphologyEx(outI,outI,cv::MORPH_CLOSE,element);
     }
 
     if(str.compare("SP")==0)
@@ -147,9 +152,11 @@ void processEngine::addProcess(const QString &str, ...)
 
     if(str.compare("Kernel")==0)
     {
+        int center = va_arg( args, int );
+        float border = -(center-1)/4;
         int kernel_size = 3;
-        cv::Mat kernel = (cv::Mat_<double>(kernel_size, kernel_size) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
-        cv::filter2D(outI, outI, -1, kernel);
+        cv::Mat kernel = ( cv::Mat_<double>( kernel_size, kernel_size ) << 0, border, 0, border, center, border, 0, border, 0 );
+        cv::filter2D( outI, outI, -1, kernel );
     }
 
     if(str.compare("Canny")==0)
@@ -167,7 +174,7 @@ void processEngine::addProcess(const QString &str, ...)
     }
 
     if(str.compare("Circles")==0)
-    {                               //Do not give good results
+    {
         ///Convert image to gray
         cv::Mat outI_gray;
         cvtColor(outI, outI_gray, CV_BGR2GRAY);
@@ -176,7 +183,8 @@ void processEngine::addProcess(const QString &str, ...)
         vector<cv::Vec3f> circles;
 
         ///Apply the hough transform to find circles
-        cv::HoughCircles(outI_gray, circles, CV_HOUGH_GRADIENT, 1, outI_gray.rows/8, 200, 100, 0, 0); //Play with parameter 2
+        int param2 = va_arg( args, int );
+        cv::HoughCircles(outI_gray, circles, CV_HOUGH_GRADIENT, 1, outI_gray.rows/8, 200, param2, 0, 0); //Play with parameter 2
         cout<<circles.size()<<endl;
         ///Draw detected circles
         for( size_t i = 0; i < circles.size(); i++ )
@@ -201,7 +209,8 @@ void processEngine::addProcess(const QString &str, ...)
         vector<cv::Vec4i> lines;
 
         ///Apply hough transform
-        cv::HoughLinesP(outI_gray, lines, 1, CV_PI/180, 100, 50, 10 ); //Play with threshold
+        int thresh = va_arg( args, int );
+        cv::HoughLinesP( outI_gray, lines, 1, CV_PI/180, thresh, 50, 10 );
         cout<<lines.size()<<endl;
 
         ///Draw the detected lines
@@ -222,7 +231,7 @@ void processEngine::addProcess(const QString &str, ...)
         int blockSize = 2;
         int apertureSize = 3;
         double k = 0.04;
-        int thresh = 150;   //Play with thresh
+        int thresh = va_arg( args, int );
 
         ///Detect corners
         cv::cornerHarris( outI_gray, corners, blockSize, apertureSize, k, cv::BORDER_DEFAULT );
@@ -245,7 +254,7 @@ void processEngine::addProcess(const QString &str, ...)
 
     if(str.compare("SURF")==0)
     {
-        int minHessian = 400;
+        int minHessian = va_arg( args, int );
         cv::Ptr<SURF> detector = SURF::create( minHessian );
 
         vector<cv::KeyPoint> keypoints;
@@ -257,7 +266,8 @@ void processEngine::addProcess(const QString &str, ...)
 
     if(str.compare("SIFT")==0)
     {
-        cv::Ptr<cv::Feature2D> f2d = SIFT::create();
+        int nPts = va_arg( args, int );
+        cv::Ptr<cv::Feature2D> f2d = SIFT::create( nPts );
 
         vector<cv::KeyPoint> keypoints;
         f2d->detect( outI, keypoints );
@@ -271,7 +281,7 @@ void processEngine::addProcess(const QString &str, ...)
         cv::Mat outI_gray;
         cv::cvtColor(outI, outI_gray, CV_BGR2GRAY);
 
-        int thresh = 9;
+        int thresh = va_arg( args, int ); //9;
         vector<cv::KeyPoint> keypoints;
         cv::FAST(outI_gray, keypoints, thresh, true);
 
@@ -282,28 +292,15 @@ void processEngine::addProcess(const QString &str, ...)
 
 }
 
-void processEngine::displayHist()
+void processEngine::computeHist(cv::Mat histImage[3])
 {
-    ///Draw the histograms for B, G and R
+    ///initialize the histograms for B, G and R
    int hist_w = 512; int hist_h = 400;
 
-   cv::Mat histImage[3];
    histImage[0] = cv::Mat( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
    histImage[1] = cv::Mat( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
    histImage[2] = cv::Mat( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
 
+   ///Fill the matrices
    getHistogram(outI, histImage);
-
-   /// Display
-    cv::namedWindow("calcHist Demo1", CV_WINDOW_KEEPRATIO );
-    cv::imshow("calcHist Demo1", histImage[0] );
-    cv::waitKey(10);
-
-    cv::namedWindow("calcHist Demo2", CV_WINDOW_KEEPRATIO );
-    cv::imshow("calcHist Demo2", histImage[1] );
-    cv::waitKey(10);
-
-    cv::namedWindow("calcHist Demo3", CV_WINDOW_KEEPRATIO );
-    cv::imshow("calcHist Demo3", histImage[2] );
-    cv::waitKey(10);
 }

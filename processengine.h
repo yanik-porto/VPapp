@@ -20,13 +20,31 @@ class processEngine : public QObject
 {
     Q_OBJECT
 public:
+
+    /**
+     * constructors and destructors
+     */
     explicit processEngine(QObject *parent = 0);
     ~processEngine();
 
+    /**
+     * enter image path inside the class
+     */
     void loadImg(const QString &filename);
+
+    /**
+     * main function where all the process are applied
+     */
     void addProcess(const QString &str, ...);
-    void displayHist();
+
+
+    void computeHist(cv::Mat histImage[3]);
+
+    /**
+     * Accessors
+     */
     const cv::Mat &get_processedImg() const {return outI;}
+
     const cv::Mat &get_originalImg() const {return inI;}
 
 private:

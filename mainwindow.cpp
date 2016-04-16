@@ -18,9 +18,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setGeometry(0,0,screen.width()/2-68,screen.height());
 
     procEng = new processEngine;
-    QObject::connect(procEng,SIGNAL(ImgReadyIn()),this,SLOT(Display_inImg()));
+    //QObject::connect(procEng,SIGNAL(ImgReadyIn()),this,SLOT(Display_inImg()));
     QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
     QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
+
+    cv::moveWindow(outFrame,screen.width()/2,0);
 }
 
 MainWindow::~MainWindow()
@@ -55,13 +57,12 @@ void MainWindow::Display_inImg()
 void MainWindow::Display_outImg()
 {
     show_cv(outFrame,procEng->get_processedImg(),delay);
-    cv::moveWindow(outFrame,screen.width()/2,screen.height()/2);
+//    cv::moveWindow(outFrame,screen.width()/2,0);
 }
 
 void MainWindow::Disable_widgets()
 {
     int type_img = procEng->get_processedImg().type();
-    cout<<type_img<<endl;
 
     switch(type_img)
     {
@@ -91,6 +92,10 @@ void MainWindow::on_pushButton_open_clicked()
     QString filename = QFileDialog::getOpenFileName();
     I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
     procEng->loadImg(filename);
+
+    //Display the input image in the GUI
+    QImage originalImg(filename);
+    ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
 }
 
 void MainWindow::on_pushButton_webcam_clicked()
@@ -128,7 +133,8 @@ void MainWindow::on_pushButton_reset_clicked()
 
 void MainWindow::on_pushButton_Blur_clicked()
 {
-    procEng->addProcess("Blur");
+    int sizeKernel = ui->lineEdit_sizeKernel->text().toInt();
+    procEng->addProcess( "Blur", sizeKernel );
 }
 
 void MainWindow::on_pushButton_flip_clicked()
@@ -148,17 +154,21 @@ void MainWindow::on_pushButton_flip_clicked()
         procEng->addProcess("Flip",flipCode);
 }
 
-void MainWindow::on_listWidget_activated(const QModelIndex &index)
+
+void MainWindow::on_pushButton_morph_clicked()
 {
+    QModelIndex index = ui->listWidget->currentIndex();
+    int sizeElmt = ui->lineEdit_sizeElmt->text().toInt();
+
     switch(index.row())
     {
-    case 0: procEng->addProcess("Erode");
+    case 0: procEng->addProcess( "Erode", sizeElmt );
         break;
-    case 1: procEng->addProcess("Dilate");
+    case 1: procEng->addProcess( "Dilate", sizeElmt );
         break;
-    case 2: procEng->addProcess("Open");
+    case 2: procEng->addProcess( "Open", sizeElmt );
         break;
-    case 3: procEng->addProcess("Close");
+    case 3: procEng->addProcess( "Close", sizeElmt );
         break;
     default: break;
     }
@@ -182,7 +192,39 @@ void MainWindow::on_pushButton_invert_clicked()
 
 void MainWindow::on_pushButton_hist_clicked()
 {
-    procEng->displayHist();
+    ///Instantiate the matrices
+    cv::Mat histImage[3];
+
+    ///Get the histograms from processEngine class
+    procEng->computeHist(histImage);
+
+    for(int i=0; i<3; i++)
+    {
+        cv::cvtColor(histImage[i], histImage[i], CV_BGR2RGB);
+    }
+
+    QImage histR((const unsigned char*)(histImage[2].data), histImage[2].cols,  histImage[2].rows, QImage::Format_RGB888);
+    ui->label_histR->setPixmap(QPixmap::fromImage(histR.scaled(ui->label_histR->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+
+    QImage histG((const unsigned char*)(histImage[1].data), histImage[1].cols,  histImage[1].rows, QImage::Format_RGB888);
+    ui->label_histG->setPixmap(QPixmap::fromImage(histG.scaled(ui->label_histG->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+
+    QImage histB((const unsigned char*)(histImage[0].data), histImage[0].cols,  histImage[0].rows, QImage::Format_RGB888);
+    ui->label_histB->setPixmap(QPixmap::fromImage(histB.scaled(ui->label_histB->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+
+
+//    /// Display each color histogram
+//     cv::namedWindow("calcHist Demo1", CV_WINDOW_KEEPRATIO );
+//     cv::imshow("calcHist Demo1", histImage[0] );
+//     cv::waitKey(10);
+
+//     cv::namedWindow("calcHist Demo2", CV_WINDOW_KEEPRATIO );
+//     cv::imshow("calcHist Demo2", histImage[1] );
+//     cv::waitKey(10);
+
+//     cv::namedWindow("calcHist Demo3", CV_WINDOW_KEEPRATIO );
+//     cv::imshow("calcHist Demo3", histImage[2] );
+//     cv::waitKey(10);
 }
 
 void MainWindow::on_pushButton_eq_clicked()
@@ -210,7 +252,8 @@ void MainWindow::on_pushButton_lapl_clicked()
 
 void MainWindow::on_pushButton_kernel_clicked()
 {
-    procEng->addProcess("Kernel");
+    int cntKernel = ui->lineEdit_kernelCnt->text().toInt();
+    procEng->addProcess( "Kernel", cntKernel );
 }
 
 void MainWindow::on_pushButton_canny_clicked()
@@ -220,30 +263,60 @@ void MainWindow::on_pushButton_canny_clicked()
 
 void MainWindow::on_pushButton_circles_clicked()
 {
-    procEng->addProcess("Circles");
+    int thresh = ui->horizontalSlider_circleThresh->value();
+    procEng->addProcess( "Circles", thresh );
 }
 
 void MainWindow::on_pushButton_lines_clicked()
 {
-    procEng->addProcess("Lines");
+    int thresh = ui->horizontalSlider_lineThresh->value();
+    procEng->addProcess( "Lines", thresh );
 }
 
 void MainWindow::on_pushButton_harris_clicked()
 {
-    procEng->addProcess("Harris");
+    int thresh = ui->horizontalSlider_harrisThresh->value();
+    procEng->addProcess( "Harris", thresh );
 }
 
 void MainWindow::on_pushButton_surf_clicked()
 {
-    procEng->addProcess("SURF");
+    int thresh = ui->horizontalSlider_SURFThresh->value();
+    procEng->addProcess( "SURF", thresh );
 }
 
 void MainWindow::on_pushButton_sift_clicked()
 {
-    procEng->addProcess("SIFT");
+    int nPts = ui->horizontalSlider_SIFTThresh->value();
+    procEng->addProcess( "SIFT", nPts );
 }
 
 void MainWindow::on_pushButton_fast_clicked()
 {
-    procEng->addProcess("FAST");
+    int thresh = ui->horizontalSlider_FASTThresh->value();
+    procEng->addProcess( "FAST", thresh );
+}
+
+
+/**
+ * Slots for actions in gui
+ */
+void MainWindow::on_horizontalSlider_harrisThresh_sliderMoved(int position)
+{
+    ui->label_threshvalue->setText(QString::number(position));
+}
+
+void MainWindow::on_horizontalSlider_SURFThresh_sliderMoved(int position)
+{
+    ui->label_threshvalue_2->setText(QString::number(position));
+}
+
+void MainWindow::on_horizontalSlider_SIFTThresh_sliderMoved(int position)
+{
+    ui->label_threshvalue_3->setText(QString::number(position));
+}
+
+void MainWindow::on_horizontalSlider_FASTThresh_sliderMoved(int position)
+{
+    ui->label_threshvalue_4->setText(QString::number(position));
 }
