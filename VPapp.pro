@@ -15,11 +15,19 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     processengine.cpp \
-    imgprocfunctions.cpp
+    imgprocfunctions.cpp \
+    ipmethod.cpp \
+    sandp.cpp \
+    filters.cpp \
+    derivatives.cpp
 
 HEADERS  += mainwindow.h \
     processengine.h \
-    imgprocfunctions.h
+    imgprocfunctions.h \
+    ipmethod.h \
+    sandp.h \
+    filters.h \
+    derivatives.h
 
 FORMS    += mainwindow.ui
 

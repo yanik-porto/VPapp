@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setGeometry(0,0,screen.width()/2-68,screen.height());
 
     procEng = new processEngine;
-    //QObject::connect(procEng,SIGNAL(ImgReadyIn()),this,SLOT(Display_inImg()));
+    QObject::connect(this,SIGNAL(qInputImageReady()),this,SLOT(Display_inImg()));
     QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
     QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
 
@@ -50,14 +50,12 @@ int MainWindow::show_cv(const String &winname,const Mat &image, const int &delay
 
 void MainWindow::Display_inImg()
 {
-    show_cv(inFrame,procEng->get_originalImg(),delay);
-    cv::moveWindow(inFrame,screen.width()/2,0);
+    ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
 }
 
 void MainWindow::Display_outImg()
 {
     show_cv(outFrame,procEng->get_processedImg(),delay);
-//    cv::moveWindow(outFrame,screen.width()/2,0);
 }
 
 void MainWindow::Disable_widgets()
@@ -90,12 +88,15 @@ void MainWindow::on_pushButton_open_clicked()
 {
     //Get path to image and read image into cv matrix
     QString filename = QFileDialog::getOpenFileName();
-    I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
-    procEng->loadImg(filename);
+    if(filename.compare("")!=0)
+    {
+        I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
+        procEng->loadImg(I);
 
-    //Display the input image in the GUI
-    QImage originalImg(filename);
-    ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+        //Display the input image in the GUI
+        originalImg = QImage(filename);
+        qInputImageReady();
+    }
 }
 
 void MainWindow::on_pushButton_webcam_clicked()
@@ -105,13 +106,17 @@ void MainWindow::on_pushButton_webcam_clicked()
 
     while(cap.read(frame))
     {
-        ch = show_cv("Input", frame, delay);
+//        ch = show_cv("Input", frame, delay);
 //        Canny(frame, edges, 50, 150);
 //        ch = show_cv("Canny",edges,delay);
+        procEng->loadImg(frame);
+        cv::cvtColor( frame, frame, CV_BGR2RGB );
+        originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
+        qInputImageReady();
+        ch = cv::waitKey(delay);
         if (ch == 27) break;
     }
 }
-
 
 void MainWindow::on_pushButton_stopcam_clicked()
 {
@@ -123,19 +128,14 @@ void MainWindow::on_pushButton_stopcam_clicked()
 
 void MainWindow::on_pushButton_reset_clicked()
 {
-    procEng->addProcess("Reset");
+    //procEng->addProcess("Reset");
+    procEng->reset();
 }
 
 
 /**
  * Slots called by buttons applying a process on the image
  */
-
-void MainWindow::on_pushButton_Blur_clicked()
-{
-    int sizeKernel = ui->lineEdit_sizeKernel->text().toInt();
-    procEng->addProcess( "Blur", sizeKernel );
-}
 
 void MainWindow::on_pushButton_flip_clicked()
 {
@@ -154,6 +154,17 @@ void MainWindow::on_pushButton_flip_clicked()
         procEng->addProcess("Flip",flipCode);
 }
 
+void MainWindow::on_pushButton_Blur_clicked()
+{
+    int sizeKernel = ui->lineEdit_sizeKernel->text().toInt();
+    procEng->addProcess( "blur", sizeKernel );
+}
+
+void MainWindow::on_pushButton_kernel_clicked()
+{
+    int cntKernel = ui->lineEdit_kernelCnt->text().toInt();
+    procEng->addProcess( "sharpen", cntKernel );
+}
 
 void MainWindow::on_pushButton_morph_clicked()
 {
@@ -162,13 +173,13 @@ void MainWindow::on_pushButton_morph_clicked()
 
     switch(index.row())
     {
-    case 0: procEng->addProcess( "Erode", sizeElmt );
+    case 0: procEng->addProcess( "erode", sizeElmt );
         break;
-    case 1: procEng->addProcess( "Dilate", sizeElmt );
+    case 1: procEng->addProcess( "dilate", sizeElmt );
         break;
-    case 2: procEng->addProcess( "Open", sizeElmt );
+    case 2: procEng->addProcess( "open", sizeElmt );
         break;
-    case 3: procEng->addProcess( "Close", sizeElmt );
+    case 3: procEng->addProcess( "close", sizeElmt );
         break;
     default: break;
     }
@@ -176,7 +187,8 @@ void MainWindow::on_pushButton_morph_clicked()
 
 void MainWindow::on_pushButton_sp_clicked()
 {
-    procEng->addProcess("SP");
+    double rate = double(ui->horizontalSlider_sandp->value())/100;
+    procEng->addProcess("SP", rate);
 }
 
 void MainWindow::on_pushButton_logo_clicked()
@@ -239,26 +251,19 @@ void MainWindow::on_pushButton_resize_clicked()
     procEng->addProcess( "Resize", height, width );
 }
 
-
 void MainWindow::on_pushButton_sobel_clicked()
 {
-    procEng->addProcess("Sobel");
+    procEng->addProcess("sobel");
 }
 
 void MainWindow::on_pushButton_lapl_clicked()
 {
-    procEng->addProcess("Laplacian");
-}
-
-void MainWindow::on_pushButton_kernel_clicked()
-{
-    int cntKernel = ui->lineEdit_kernelCnt->text().toInt();
-    procEng->addProcess( "Kernel", cntKernel );
+    procEng->addProcess("laplacian");
 }
 
 void MainWindow::on_pushButton_canny_clicked()
 {
-    procEng->addProcess("Canny");
+    procEng->addProcess("canny");
 }
 
 void MainWindow::on_pushButton_circles_clicked()

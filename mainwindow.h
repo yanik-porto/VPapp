@@ -53,6 +53,11 @@ private:
 
     int delay;
 
+    QImage originalImg;
+
+signals:
+    void qInputImageReady();
+
 private slots:
     /**
      * Slot called from signal of processengine class

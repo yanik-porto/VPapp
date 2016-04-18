@@ -2,6 +2,10 @@
 #define PROCESSENGINE_H
 
 #include "imgprocfunctions.h"
+#include "ipmethod.h"
+#include "sandp.h"
+#include "filters.h"
+#include "derivatives.h"
 
 #include <QObject>
 #include <QString>
@@ -30,7 +34,8 @@ public:
     /**
      * enter image path inside the class
      */
-    void loadImg(const QString &filename);
+    //void loadImg(const QString &filename);
+    void loadImg(const cv::Mat &matImg);
 
     /**
      * main function where all the process are applied
@@ -47,16 +52,24 @@ public:
 
     const cv::Mat &get_originalImg() const {return inI;}
 
+
+
+    void process();
+
+    void reset();
+
 private:
     cv::Mat inI;
     cv::Mat outI;
+
+    vector<ipmethod*> ipmethodList;
 
 signals:
     void ImgReadyOut();
     void ImgReadyIn();
 
 public slots:
-    void changeToGray();
+    void changeToBGR();
 
 };
 
