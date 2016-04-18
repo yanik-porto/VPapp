@@ -181,69 +181,75 @@ void processEngine::addProcess(const QString &str, ...)
 
     if(str.compare("Harris")==0)    //Do non maximal suppression
     {
-        ///Convert image to gray
-        cv::Mat outI_gray, corners, corners_scaled;
-        cvtColor(outI, outI_gray, CV_BGR2GRAY);
-
-        ///Detector Parameters
-        int blockSize = 2;
-        int apertureSize = 3;
-        double k = 0.04;
         int thresh = va_arg( args, int );
+        method = new FeaturesPts( str, thresh );
+//        ///Convert image to gray
+//        cv::Mat outI_gray, corners, corners_scaled;
+//        cvtColor(outI, outI_gray, CV_BGR2GRAY);
 
-        ///Detect corners
-        cv::cornerHarris( outI_gray, corners, blockSize, apertureSize, k, cv::BORDER_DEFAULT );
+//        ///Detector Parameters
+//        int blockSize = 2;
+//        int apertureSize = 3;
+//        double k = 0.04;
+//        int thresh = va_arg( args, int );
 
-        /// Normalizing
-        cv::normalize( corners, corners, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat() );
-        cv::convertScaleAbs( corners, corners_scaled );
+//        ///Detect corners
+//        cv::cornerHarris( outI_gray, corners, blockSize, apertureSize, k, cv::BORDER_DEFAULT );
 
-        /// Drawing a circle around corners
-        for( int j = 0; j < corners.rows ; j++ )
-           { for( int i = 0; i < corners.cols; i++ )
-                {
-                  if( (int) corners.at<float>(j,i) > thresh )
-                    {
-                     cv::circle( outI, cv::Point( i, j ), 5,  cv::Scalar(0,0,255), 2, 8, 0 );
-                    }
-                }
-           }
+//        /// Normalizing
+//        cv::normalize( corners, corners, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat() );
+//        cv::convertScaleAbs( corners, corners_scaled );
+
+//        /// Drawing a circle around corners
+//        for( int j = 0; j < corners.rows ; j++ )
+//           { for( int i = 0; i < corners.cols; i++ )
+//                {
+//                  if( (int) corners.at<float>(j,i) > thresh )
+//                    {
+//                     cv::circle( outI, cv::Point( i, j ), 5,  cv::Scalar(0,0,255), 2, 8, 0 );
+//                    }
+//                }
+//           }
     }
 
     if(str.compare("SURF")==0)
     {
         int minHessian = va_arg( args, int );
-        cv::Ptr<SURF> detector = SURF::create( minHessian );
+        method = new FeaturesPts( str, minHessian );
+//        cv::Ptr<SURF> detector = SURF::create( minHessian );
 
-        vector<cv::KeyPoint> keypoints;
-        detector->detect( outI, keypoints );
+//        vector<cv::KeyPoint> keypoints;
+//        detector->detect( outI, keypoints );
 
-        cv::drawKeypoints(outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+//        cv::drawKeypoints(outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
 
     }
 
     if(str.compare("SIFT")==0)
     {
         int nPts = va_arg( args, int );
-        cv::Ptr<cv::Feature2D> f2d = SIFT::create( nPts );
+        method = new FeaturesPts( str, nPts );
+//        cv::Ptr<cv::Feature2D> f2d = SIFT::create( nPts );
 
-        vector<cv::KeyPoint> keypoints;
-        f2d->detect( outI, keypoints );
+//        vector<cv::KeyPoint> keypoints;
+//        f2d->detect( outI, keypoints );
 
-        cv::drawKeypoints( outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+//        cv::drawKeypoints( outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
 
     }
 
     if(str.compare("FAST")==0)
     {
-        cv::Mat outI_gray;
-        cv::cvtColor(outI, outI_gray, CV_BGR2GRAY);
-
         int thresh = va_arg( args, int ); //9;
-        vector<cv::KeyPoint> keypoints;
-        cv::FAST(outI_gray, keypoints, thresh, true);
+        method = new FeaturesPts( str, thresh );
+//        cv::Mat outI_gray;
+//        cv::cvtColor(outI, outI_gray, CV_BGR2GRAY);
 
-        cv::drawKeypoints( outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+//        int thresh = va_arg( args, int ); //9;
+//        vector<cv::KeyPoint> keypoints;
+//        cv::FAST(outI_gray, keypoints, thresh, true);
+
+//        cv::drawKeypoints( outI, keypoints, outI, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
     }
 
     ipmethodList.push_back(method);

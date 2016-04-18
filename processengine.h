@@ -6,6 +6,8 @@
 #include "sandp.h"
 #include "filters.h"
 #include "derivatives.h"
+#include "featuresPts.h"
+//#include "features.h"
 
 #include <QObject>
 #include <QString>
@@ -18,7 +20,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace cv::xfeatures2d;
+//using namespace cv::xfeatures2d;
 
 class processEngine : public QObject
 {

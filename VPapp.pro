@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     ipmethod.cpp \
     sandp.cpp \
     filters.cpp \
-    derivatives.cpp
+    derivatives.cpp \
+    featuresPts.cpp
 
 HEADERS  += mainwindow.h \
     processengine.h \
@@ -27,7 +28,8 @@ HEADERS  += mainwindow.h \
     ipmethod.h \
     sandp.h \
     filters.h \
-    derivatives.h
+    derivatives.h \
+    featuresPts.h
 
 FORMS    += mainwindow.ui
 

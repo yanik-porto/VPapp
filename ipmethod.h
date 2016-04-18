@@ -9,6 +9,8 @@
 
 #include <QString>
 
+using namespace std;
+
 class ipmethod
 {
 public:
