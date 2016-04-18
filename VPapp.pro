@@ -20,7 +20,12 @@ SOURCES += main.cpp\
     sandp.cpp \
     filters.cpp \
     derivatives.cpp \
-    featuresPts.cpp
+    featuresPts.cpp \
+    colorbasics.cpp \
+    flipimg.cpp \
+    resizeimg.cpp \
+    houghtrans.cpp \
+    addlogo.cpp
 
 HEADERS  += mainwindow.h \
     processengine.h \
@@ -29,7 +34,12 @@ HEADERS  += mainwindow.h \
     sandp.h \
     filters.h \
     derivatives.h \
-    featuresPts.h
+    featuresPts.h \
+    colorbasics.h \
+    flipimg.h \
+    resizeimg.h \
+    houghtrans.h \
+    addlogo.h
 
 FORMS    += mainwindow.ui
 

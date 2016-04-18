@@ -7,7 +7,11 @@
 #include "filters.h"
 #include "derivatives.h"
 #include "featuresPts.h"
-//#include "features.h"
+#include "colorbasics.h"
+#include "flipimg.h"
+#include "resizeimg.h"
+#include "houghtrans.h"
+#include "addlogo.h"
 
 #include <QObject>
 #include <QString>

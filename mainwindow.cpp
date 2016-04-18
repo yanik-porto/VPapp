@@ -27,6 +27,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    //Does not work
+    if(cap.isOpened())
+    {
+
+        cap.release();
+    }
+
     delete procEng;
     delete ui;
 }
@@ -151,7 +158,7 @@ void MainWindow::on_pushButton_flip_clicked()
         flipCode = 0;
 
     if(flipCode!=10)
-        procEng->addProcess("Flip",flipCode);
+        procEng->addProcess("flip",flipCode);
 }
 
 void MainWindow::on_pushButton_Blur_clicked()
@@ -193,13 +200,12 @@ void MainWindow::on_pushButton_sp_clicked()
 
 void MainWindow::on_pushButton_logo_clicked()
 {
-    procEng->addProcess("Logo");
-
+     procEng->addProcess( "logo" );
 }
 
 void MainWindow::on_pushButton_invert_clicked()
 {
-    procEng->addProcess("Invert");
+    procEng->addProcess("invert");
 }
 
 void MainWindow::on_pushButton_hist_clicked()
@@ -241,7 +247,7 @@ void MainWindow::on_pushButton_hist_clicked()
 
 void MainWindow::on_pushButton_eq_clicked()
 {
-    procEng->addProcess("Equalize");
+    procEng->addProcess("equalize");
 }
 
 void MainWindow::on_pushButton_resize_clicked()
@@ -269,13 +275,13 @@ void MainWindow::on_pushButton_canny_clicked()
 void MainWindow::on_pushButton_circles_clicked()
 {
     int thresh = ui->horizontalSlider_circleThresh->value();
-    procEng->addProcess( "Circles", thresh );
+    procEng->addProcess( "circles", thresh );
 }
 
 void MainWindow::on_pushButton_lines_clicked()
 {
     int thresh = ui->horizontalSlider_lineThresh->value();
-    procEng->addProcess( "Lines", thresh );
+    procEng->addProcess( "lines", thresh );
 }
 
 void MainWindow::on_pushButton_harris_clicked()
