@@ -206,3 +206,9 @@ void processEngine::reset()
         process();
     }
 }
+
+void processEngine::removeMethod(const int &ind)
+{
+    ipmethodList.erase( ipmethodList.begin() + ind );
+    process();
+}

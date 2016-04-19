@@ -29,6 +29,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(procEng2, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
 
     cv::moveWindow(outFrame,screen.width()/2,0);
+
+    ui->listWidget_process->setEnabled(true);
+    ui->listWidget_process_2->setEnabled(false);
+    ui->label_img1->setEnabled(true);
+    ui->label_img2->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -65,6 +70,23 @@ void MainWindow::sendProcessRequest(const int &frame, const QString &str, ...)
 
     va_end(vl);
 
+}
+
+void MainWindow::updateListProcess(const QString &str)
+{
+    switch(selectImg)
+    {
+    case 1:
+        ui->listWidget_process->addItem( str );
+        ui->listWidget_process->setCurrentRow( ui->listWidget_process->count() - 1 );
+        break;
+    case 2:
+        ui->listWidget_process_2->addItem( str );
+        ui->listWidget_process_2->setCurrentRow( ui->listWidget_process_2->count() - 1 );
+        break;
+    default:
+        break;
+    }
 }
 
 /**
@@ -199,90 +221,41 @@ void MainWindow::on_pushButton_reset_clicked()
     switch(selectImg)
     {
     case 1: procEng->reset();
+        ui->listWidget_process->clear();
         break;
     case 2: procEng2->reset();
+        ui->listWidget_process_2->clear();
         break;
     default:
         break;
     }
 
+
+
 }
 
+void MainWindow::on_pushButton_rmv_clicked()
+{
+    int row;
+
+    switch(selectImg)
+    {
+    case 1: row = ui->listWidget_process->currentRow();
+        delete ui->listWidget_process->takeItem(row);
+        procEng->removeMethod(row);
+        break;
+    case 2: row = ui->listWidget_process_2->currentRow();
+        delete ui->listWidget_process_2->takeItem(row);
+        procEng2->removeMethod(row);
+        break;
+    default:
+        break;
+    }
+}
 
 /**
- * Slots called by buttons applying a process on the image
+ * Function for displaying the histograms
  */
-
-void MainWindow::on_pushButton_flip_clicked()
-{
-    int flipCode = 10;
-    bool horiz = ui->checkBox_horiz->isChecked();
-    bool vert = ui->checkBox_vert->isChecked();
-
-    if(horiz&&vert)
-        flipCode = -1;
-    else if(horiz&&!vert)
-        flipCode = 1;
-    else if(!horiz&&vert)
-        flipCode = 0;
-
-    if(flipCode!=10)
-    {
-        sendProcessRequest(selectImg, "flip", flipCode);
-    }
-}
-
-void MainWindow::on_pushButton_Blur_clicked()
-{
-    int sizeKernel = ui->lineEdit_sizeKernel->text().toInt();
-    sendProcessRequest(selectImg, "blur", sizeKernel);
-}
-
-void MainWindow::on_pushButton_kernel_clicked()
-{
-    int cntKernel = ui->lineEdit_kernelCnt->text().toInt();
-    sendProcessRequest( selectImg, "sharpen", cntKernel );
-}
-
-void MainWindow::on_pushButton_morph_clicked()
-{
-    QModelIndex index = ui->listWidget->currentIndex();
-    int sizeElmt = ui->lineEdit_sizeElmt->text().toInt();
-
-    switch(index.row())
-    {
-    case 0:
-        sendProcessRequest( selectImg, "erode", sizeElmt );
-        break;
-    case 1:
-        sendProcessRequest( selectImg, "dilate", sizeElmt );
-        break;
-    case 2:
-        sendProcessRequest( selectImg, "open", sizeElmt );
-        break;
-    case 3:
-        sendProcessRequest( selectImg, "close", sizeElmt );
-        break;
-    default: break;
-    }
-}
-
-void MainWindow::on_pushButton_sp_clicked()
-{
-    double rate = double(ui->horizontalSlider_sandp->value())/100;
-    sendProcessRequest( selectImg, "SP", rate );
-}
-
-void MainWindow::on_pushButton_logo_clicked()
-{
-    sendProcessRequest( selectImg, "logo" );
-}
-
-void MainWindow::on_pushButton_invert_clicked()
-{
-    sendProcessRequest( selectImg, "invert" );
-}
-
 void MainWindow::on_pushButton_hist_clicked()
 {
     ///Instantiate the matrices
@@ -314,9 +287,94 @@ void MainWindow::on_pushButton_hist_clicked()
     ui->label_histB->setPixmap(QPixmap::fromImage(histB.scaled(ui->label_histB->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
 }
 
+/**
+ * Slots called by buttons applying a process on the image
+ */
+
+void MainWindow::on_pushButton_flip_clicked()
+{
+    int flipCode = 10;
+    bool horiz = ui->checkBox_horiz->isChecked();
+    bool vert = ui->checkBox_vert->isChecked();
+
+    if(horiz&&vert)
+        flipCode = -1;
+    else if(horiz&&!vert)
+        flipCode = 1;
+    else if(!horiz&&vert)
+        flipCode = 0;
+
+    if(flipCode!=10)
+    {
+        sendProcessRequest(selectImg, "flip", flipCode);
+        updateListProcess("flip " + QString::number(flipCode));
+    }
+}
+
+void MainWindow::on_pushButton_Blur_clicked()
+{
+    int sizeKernel = ui->lineEdit_sizeKernel->text().toInt();
+    sendProcessRequest(selectImg, "blur", sizeKernel);
+    updateListProcess("blur " + QString::number(sizeKernel));
+}
+
+void MainWindow::on_pushButton_kernel_clicked()
+{
+    int cntKernel = ui->lineEdit_kernelCnt->text().toInt();
+    sendProcessRequest( selectImg, "sharpen", cntKernel );
+    updateListProcess("sharpen " + QString::number(cntKernel));
+}
+
+void MainWindow::on_pushButton_morph_clicked()
+{
+    QModelIndex index = ui->listWidget->currentIndex();
+    int sizeElmt = ui->lineEdit_sizeElmt->text().toInt();
+
+    switch(index.row())
+    {
+    case 0:
+        sendProcessRequest( selectImg, "erode", sizeElmt );
+        updateListProcess("erode " + QString::number(sizeElmt));
+        break;
+    case 1:
+        sendProcessRequest( selectImg, "dilate", sizeElmt );
+        updateListProcess("dilate " + QString::number(sizeElmt));
+        break;
+    case 2:
+        sendProcessRequest( selectImg, "open", sizeElmt );
+        updateListProcess("open " + QString::number(sizeElmt));
+        break;
+    case 3:
+        sendProcessRequest( selectImg, "close", sizeElmt );
+        updateListProcess("close " + QString::number(sizeElmt));
+        break;
+    default: break;
+    }
+}
+
+void MainWindow::on_pushButton_sp_clicked()
+{
+    double rate = double(ui->horizontalSlider_sandp->value())/100;
+    sendProcessRequest( selectImg, "SP", rate );
+    updateListProcess("salt & pepper " + QString::number(rate));
+}
+
+void MainWindow::on_pushButton_logo_clicked()
+{
+    sendProcessRequest( selectImg, "logo" );
+    updateListProcess("logo ");
+}
+
+void MainWindow::on_pushButton_invert_clicked()
+{
+    sendProcessRequest( selectImg, "invert" );
+    updateListProcess("invert" );
+}
+
 void MainWindow::on_pushButton_eq_clicked()
 {
     sendProcessRequest( selectImg, "equalize" );
+    updateListProcess("equalize" );
 }
 
 void MainWindow::on_pushButton_resize_clicked()
@@ -324,57 +382,67 @@ void MainWindow::on_pushButton_resize_clicked()
     int height = ui->lineEdit_height->text().toInt();
     int width = ui->lineEdit_width->text().toInt();
     sendProcessRequest( selectImg, "Resize", height, width );
+    updateListProcess("resize " + QString::number(height) + ", " + QString::number(width));
 }
 
 void MainWindow::on_pushButton_sobel_clicked()
 {
     sendProcessRequest( selectImg, "sobel" );
+    updateListProcess("sobel" );
 }
 
 void MainWindow::on_pushButton_lapl_clicked()
 {
     sendProcessRequest( selectImg, "laplacian" );
+    updateListProcess("laplacian" );
 }
 
 void MainWindow::on_pushButton_canny_clicked()
 {
     sendProcessRequest( selectImg, "canny" );
+    updateListProcess("canny" );
 }
 
 void MainWindow::on_pushButton_circles_clicked()
 {
     int thresh = ui->horizontalSlider_circleThresh->value();
     sendProcessRequest( selectImg, "circles", thresh );
+    updateListProcess("hough circles " + QString::number(thresh) );
 }
 
 void MainWindow::on_pushButton_lines_clicked()
 {
     int thresh = ui->horizontalSlider_lineThresh->value();
     sendProcessRequest( selectImg, "lines", thresh );
+    updateListProcess("hough lines " + QString::number(thresh) );
 }
 
 void MainWindow::on_pushButton_harris_clicked()
 {
     int thresh = ui->horizontalSlider_harrisThresh->value();
     sendProcessRequest( selectImg, "Harris", thresh );
+    updateListProcess("harris corners " + QString::number(thresh) );
 }
 
 void MainWindow::on_pushButton_surf_clicked()
 {
     int thresh = ui->horizontalSlider_SURFThresh->value();
     sendProcessRequest( selectImg, "SURF", thresh );
+    updateListProcess("SURF detector " + QString::number(thresh) );
 }
 
 void MainWindow::on_pushButton_sift_clicked()
 {
     int nPts = ui->horizontalSlider_SIFTThresh->value();
     sendProcessRequest( selectImg, "SIFT", nPts );
+    updateListProcess("SIFT detector " + QString::number(nPts) );
 }
 
 void MainWindow::on_pushButton_fast_clicked()
 {
     int thresh = ui->horizontalSlider_FASTThresh->value();
     sendProcessRequest( selectImg, "FAST", thresh );
+    updateListProcess("FAST detector " + QString::number(thresh) );
 }
 
 
@@ -411,6 +479,10 @@ void MainWindow::on_radioButton_img1_clicked(bool checked)
             selectImg = 1;
             emit qInputImageReady();
             cout<<"image 1 selected"<<endl;
+            ui->label_img1->setEnabled(true);
+            ui->label_img2->setEnabled(false);
+            ui->listWidget_process->setEnabled(true);
+            ui->listWidget_process_2->setEnabled(false);
         }
     }
 }
@@ -424,6 +496,10 @@ void MainWindow::on_radioButton_img2_clicked(bool checked)
             selectImg = 2;
             emit qInputImageReady();
             cout<<"image 2 selected"<<endl;
+            ui->label_img1->setEnabled(false);
+            ui->label_img2->setEnabled(true);
+            ui->listWidget_process->setEnabled(false);
+            ui->listWidget_process_2->setEnabled(true);
         }
     }
 }

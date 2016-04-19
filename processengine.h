@@ -67,6 +67,8 @@ public:
 
     void reset();
 
+    void removeMethod(const int &ind);
+
 private:
     cv::Mat inI;
     cv::Mat outI;

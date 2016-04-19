@@ -62,8 +62,8 @@
    <widget class="QPushButton" name="pushButton_reset">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>540</y>
+      <x>330</x>
+      <y>550</y>
       <width>81</width>
       <height>71</height>
      </rect>
@@ -1236,11 +1236,14 @@ QGroupBox::title {
    <widget class="QListWidget" name="listWidget_process">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>440</y>
-      <width>281</width>
+      <x>10</x>
+      <y>450</y>
+      <width>141</width>
       <height>171</height>
      </rect>
+    </property>
+    <property name="batchSize">
+     <number>100</number>
     </property>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
@@ -1265,7 +1268,7 @@ QGroupBox::title {
       </rect>
      </property>
      <property name="text">
-      <string>Image 1</string>
+      <string>Frame 1</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -1281,9 +1284,81 @@ QGroupBox::title {
       </rect>
      </property>
      <property name="text">
-      <string>Image 2</string>
+      <string>Frame 2</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QListWidget" name="listWidget_process_2">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>450</y>
+      <width>141</width>
+      <height>171</height>
+     </rect>
+    </property>
+    <property name="batchSize">
+     <number>100</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_img1">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>430</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <italic>false</italic>
+      <bold>true</bold>
+      <underline>false</underline>
+      <strikeout>false</strikeout>
+      <stylestrategy>PreferDefault</stylestrategy>
+      <kerning>true</kerning>
+     </font>
+    </property>
+    <property name="text">
+     <string>Frame 1</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_img2">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>430</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Frame 2</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_rmv">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>520</y>
+      <width>71</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Remove</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

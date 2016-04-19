@@ -38,6 +38,8 @@ public:
 
     void sendProcessRequest(const int &, const QString &, ...);
 
+    void updateListProcess(const QString &);
+
 private:
     Ui::MainWindow *ui;
 
@@ -137,6 +139,8 @@ private slots:
     void on_radioButton_img1_clicked(bool checked);
 
     void on_radioButton_img2_clicked(bool checked);
+
+    void on_pushButton_rmv_clicked();
 
 public slots:
 

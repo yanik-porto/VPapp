@@ -25,7 +25,7 @@ resizeImg::~resizeImg()
 void resizeImg::process(cv::Mat &inMat, cv::Mat &outMat)
 {
     cv::Size size( width, height );
-    cv::resize( inMat, outMat, size);
+    cv::resize( inMat, outMat, size );
 }
 
 void resizeImg::set_width(const int &w)
