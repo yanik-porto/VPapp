@@ -10,17 +10,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     inFrame("Input"),
     outFrame("Output"),
+    outFrame2("Output2"),
     cap(0),
-    delay(10)
+    delay(10),
+    selectImg(1)
 {
     ui->setupUi(this);
     screen = QApplication::desktop()->screenGeometry();cout<<screen.height()<<endl;
     this->setGeometry(0,0,screen.width()/2-68,screen.height());
 
     procEng = new processEngine;
+    procEng2 = new processEngine;
+
     QObject::connect(this,SIGNAL(qInputImageReady()),this,SLOT(Display_inImg()));
     QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
     QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
+
+    QObject::connect(procEng2, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
 
     cv::moveWindow(outFrame,screen.width()/2,0);
 }
@@ -36,6 +42,29 @@ MainWindow::~MainWindow()
 
     delete procEng;
     delete ui;
+}
+
+/**
+  * Function for applying a process
+  */
+
+void MainWindow::sendProcessRequest(const int &frame, const QString &str, ...)
+{
+    va_list vl;
+    va_start(vl, str);
+
+    switch(frame)
+    {
+    case 1: procEng->addProcess(str, vl);
+        break;
+    case 2: procEng2->addProcess(str, vl);
+        break;
+    default:
+        break;
+    }
+
+    va_end(vl);
+
 }
 
 /**
@@ -57,12 +86,32 @@ int MainWindow::show_cv(const String &winname,const Mat &image, const int &delay
 
 void MainWindow::Display_inImg()
 {
-    ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+    switch(selectImg)
+    {
+    case 1:
+        ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+        break;
+    case 2:
+        ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg2.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::Display_outImg()
 {
-    show_cv(outFrame,procEng->get_processedImg(),delay);
+    switch(selectImg)
+    {
+    case 1: show_cv(outFrame,procEng->get_processedImg(),delay);
+        break;
+    case 2: show_cv(outFrame2, procEng2->get_processedImg(), delay);
+        break;
+    default:
+        break;
+    }
+
+
 }
 
 void MainWindow::Disable_widgets()
@@ -98,11 +147,22 @@ void MainWindow::on_pushButton_open_clicked()
     if(filename.compare("")!=0)
     {
         I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
-        procEng->loadImg(I);
+        switch(selectImg)
+        {
+        case 1: procEng->loadImg(I);
+            originalImg = QImage(filename);
+            break;
+        case 2: procEng2->loadImg(I);
+            originalImg2 = QImage(filename);
+            break;
+        default:
+            break;
+        }
 
         //Display the input image in the GUI
-        originalImg = QImage(filename);
-        qInputImageReady();
+//        originalImg = QImage(filename);
+
+        emit qInputImageReady();
     }
 }
 
@@ -136,7 +196,16 @@ void MainWindow::on_pushButton_stopcam_clicked()
 void MainWindow::on_pushButton_reset_clicked()
 {
     //procEng->addProcess("Reset");
-    procEng->reset();
+    switch(selectImg)
+    {
+    case 1: procEng->reset();
+        break;
+    case 2: procEng2->reset();
+        break;
+    default:
+        break;
+    }
+
 }
 
 
@@ -158,19 +227,21 @@ void MainWindow::on_pushButton_flip_clicked()
         flipCode = 0;
 
     if(flipCode!=10)
-        procEng->addProcess("flip",flipCode);
+    {
+        sendProcessRequest(selectImg, "flip", flipCode);
+    }
 }
 
 void MainWindow::on_pushButton_Blur_clicked()
 {
     int sizeKernel = ui->lineEdit_sizeKernel->text().toInt();
-    procEng->addProcess( "blur", sizeKernel );
+    sendProcessRequest(selectImg, "blur", sizeKernel);
 }
 
 void MainWindow::on_pushButton_kernel_clicked()
 {
     int cntKernel = ui->lineEdit_kernelCnt->text().toInt();
-    procEng->addProcess( "sharpen", cntKernel );
+    sendProcessRequest( selectImg, "sharpen", cntKernel );
 }
 
 void MainWindow::on_pushButton_morph_clicked()
@@ -180,13 +251,17 @@ void MainWindow::on_pushButton_morph_clicked()
 
     switch(index.row())
     {
-    case 0: procEng->addProcess( "erode", sizeElmt );
+    case 0:
+        sendProcessRequest( selectImg, "erode", sizeElmt );
         break;
-    case 1: procEng->addProcess( "dilate", sizeElmt );
+    case 1:
+        sendProcessRequest( selectImg, "dilate", sizeElmt );
         break;
-    case 2: procEng->addProcess( "open", sizeElmt );
+    case 2:
+        sendProcessRequest( selectImg, "open", sizeElmt );
         break;
-    case 3: procEng->addProcess( "close", sizeElmt );
+    case 3:
+        sendProcessRequest( selectImg, "close", sizeElmt );
         break;
     default: break;
     }
@@ -195,17 +270,17 @@ void MainWindow::on_pushButton_morph_clicked()
 void MainWindow::on_pushButton_sp_clicked()
 {
     double rate = double(ui->horizontalSlider_sandp->value())/100;
-    procEng->addProcess("SP", rate);
+    sendProcessRequest( selectImg, "SP", rate );
 }
 
 void MainWindow::on_pushButton_logo_clicked()
 {
-     procEng->addProcess( "logo" );
+    sendProcessRequest( selectImg, "logo" );
 }
 
 void MainWindow::on_pushButton_invert_clicked()
 {
-    procEng->addProcess("invert");
+    sendProcessRequest( selectImg, "invert" );
 }
 
 void MainWindow::on_pushButton_hist_clicked()
@@ -214,7 +289,15 @@ void MainWindow::on_pushButton_hist_clicked()
     cv::Mat histImage[3];
 
     ///Get the histograms from processEngine class
-    procEng->computeHist(histImage);
+    switch(selectImg)
+    {
+    case 1:procEng->computeHist(histImage);
+        break;
+    case 2:procEng2->computeHist(histImage);
+        break;
+    default:
+        break;
+    }
 
     for(int i=0; i<3; i++)
     {
@@ -229,83 +312,69 @@ void MainWindow::on_pushButton_hist_clicked()
 
     QImage histB((const unsigned char*)(histImage[0].data), histImage[0].cols,  histImage[0].rows, QImage::Format_RGB888);
     ui->label_histB->setPixmap(QPixmap::fromImage(histB.scaled(ui->label_histB->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
-
-
-//    /// Display each color histogram
-//     cv::namedWindow("calcHist Demo1", CV_WINDOW_KEEPRATIO );
-//     cv::imshow("calcHist Demo1", histImage[0] );
-//     cv::waitKey(10);
-
-//     cv::namedWindow("calcHist Demo2", CV_WINDOW_KEEPRATIO );
-//     cv::imshow("calcHist Demo2", histImage[1] );
-//     cv::waitKey(10);
-
-//     cv::namedWindow("calcHist Demo3", CV_WINDOW_KEEPRATIO );
-//     cv::imshow("calcHist Demo3", histImage[2] );
-//     cv::waitKey(10);
 }
 
 void MainWindow::on_pushButton_eq_clicked()
 {
-    procEng->addProcess("equalize");
+    sendProcessRequest( selectImg, "equalize" );
 }
 
 void MainWindow::on_pushButton_resize_clicked()
 {
     int height = ui->lineEdit_height->text().toInt();
     int width = ui->lineEdit_width->text().toInt();
-    procEng->addProcess( "Resize", height, width );
+    sendProcessRequest( selectImg, "Resize", height, width );
 }
 
 void MainWindow::on_pushButton_sobel_clicked()
 {
-    procEng->addProcess("sobel");
+    sendProcessRequest( selectImg, "sobel" );
 }
 
 void MainWindow::on_pushButton_lapl_clicked()
 {
-    procEng->addProcess("laplacian");
+    sendProcessRequest( selectImg, "laplacian" );
 }
 
 void MainWindow::on_pushButton_canny_clicked()
 {
-    procEng->addProcess("canny");
+    sendProcessRequest( selectImg, "canny" );
 }
 
 void MainWindow::on_pushButton_circles_clicked()
 {
     int thresh = ui->horizontalSlider_circleThresh->value();
-    procEng->addProcess( "circles", thresh );
+    sendProcessRequest( selectImg, "circles", thresh );
 }
 
 void MainWindow::on_pushButton_lines_clicked()
 {
     int thresh = ui->horizontalSlider_lineThresh->value();
-    procEng->addProcess( "lines", thresh );
+    sendProcessRequest( selectImg, "lines", thresh );
 }
 
 void MainWindow::on_pushButton_harris_clicked()
 {
     int thresh = ui->horizontalSlider_harrisThresh->value();
-    procEng->addProcess( "Harris", thresh );
+    sendProcessRequest( selectImg, "Harris", thresh );
 }
 
 void MainWindow::on_pushButton_surf_clicked()
 {
     int thresh = ui->horizontalSlider_SURFThresh->value();
-    procEng->addProcess( "SURF", thresh );
+    sendProcessRequest( selectImg, "SURF", thresh );
 }
 
 void MainWindow::on_pushButton_sift_clicked()
 {
     int nPts = ui->horizontalSlider_SIFTThresh->value();
-    procEng->addProcess( "SIFT", nPts );
+    sendProcessRequest( selectImg, "SIFT", nPts );
 }
 
 void MainWindow::on_pushButton_fast_clicked()
 {
     int thresh = ui->horizontalSlider_FASTThresh->value();
-    procEng->addProcess( "FAST", thresh );
+    sendProcessRequest( selectImg, "FAST", thresh );
 }
 
 
@@ -330,4 +399,31 @@ void MainWindow::on_horizontalSlider_SIFTThresh_sliderMoved(int position)
 void MainWindow::on_horizontalSlider_FASTThresh_sliderMoved(int position)
 {
     ui->label_threshvalue_4->setText(QString::number(position));
+}
+
+
+void MainWindow::on_radioButton_img1_clicked(bool checked)
+{
+    if(checked == true)
+    {
+        if(selectImg == 2)
+        {
+            selectImg = 1;
+            emit qInputImageReady();
+            cout<<"image 1 selected"<<endl;
+        }
+    }
+}
+
+void MainWindow::on_radioButton_img2_clicked(bool checked)
+{
+    if(checked == true)
+    {
+        if(selectImg == 1)
+        {
+            selectImg = 2;
+            emit qInputImageReady();
+            cout<<"image 2 selected"<<endl;
+        }
+    }
 }

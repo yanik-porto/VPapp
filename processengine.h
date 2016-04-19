@@ -16,12 +16,15 @@
 #include <QObject>
 #include <QString>
 #include <QFileDialog>
+#include <iostream>
+#include <stdarg.h>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
-#include <iostream>
+
 
 using namespace std;
 //using namespace cv::xfeatures2d;
@@ -46,7 +49,7 @@ public:
     /**
      * main function where all the process are applied
      */
-    void addProcess(const QString &str, ...);
+    void addProcess(const QString &str, va_list args);
 
 
     void computeHist(cv::Mat histImage[3]);

@@ -28,11 +28,11 @@ void processEngine::changeToBGR()
     }
 }
 
-void processEngine::addProcess(const QString &str, ...)
+void processEngine::addProcess(const QString &str, va_list args)
 {
 
-    va_list args;
-    va_start(args, str);
+//    va_list args;
+//    va_start(args, str);
 
     ipmethod *method;
 

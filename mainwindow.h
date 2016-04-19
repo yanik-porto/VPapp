@@ -13,7 +13,7 @@
 #include <opencv2/opencv.hpp>
 
 
-
+#include <stdarg.h>
 #include <iostream>
 #include <vector>
 
@@ -36,6 +36,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void sendProcessRequest(const int &, const QString &, ...);
+
 private:
     Ui::MainWindow *ui;
 
@@ -44,9 +46,11 @@ private:
     int show_cv(const String &winname, const Mat &image, const int &delay);
 
     processEngine *procEng;
+    processEngine *procEng2;
 
     Mat I;
     string outFrame;
+    string outFrame2;
     string inFrame;
 
     VideoCapture cap;
@@ -54,6 +58,9 @@ private:
     int delay;
 
     QImage originalImg;
+    QImage originalImg2;
+
+    short selectImg;
 
 signals:
     void qInputImageReady();
@@ -126,6 +133,10 @@ private slots:
     void on_horizontalSlider_SIFTThresh_sliderMoved(int position);
 
     void on_horizontalSlider_FASTThresh_sliderMoved(int position);
+
+    void on_radioButton_img1_clicked(bool checked);
+
+    void on_radioButton_img2_clicked(bool checked);
 
 public slots:
 
