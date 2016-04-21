@@ -79,20 +79,20 @@ void FeaturesPts::SURF_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
 {
     cv::Ptr<SURF> detector = SURF::create( n );
 
-    vector<cv::KeyPoint> keypoints;
+//    vector<cv::KeyPoint> keypoints;
     detector->detect( inMat, keypoints );
 
-    cv::drawKeypoints(inMat, keypoints, outMat, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+    cv::drawKeypoints(inMat, keypoints, outMat, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 }
 
 void FeaturesPts::SIFT_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
 {
     cv::Ptr<cv::Feature2D> f2d = SIFT::create( n );
 
-    vector<cv::KeyPoint> keypoints;
+//    vector<cv::KeyPoint> keypoints;
     f2d->detect( inMat, keypoints );
 
-    cv::drawKeypoints( inMat, keypoints, outMat, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+    cv::drawKeypoints( inMat, keypoints, outMat, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 }
 
 void FeaturesPts::FAST_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
@@ -100,10 +100,10 @@ void FeaturesPts::FAST_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
     cv::Mat outMat_gray;
     cv::cvtColor( inMat, outMat_gray, CV_BGR2GRAY);
 
-    vector<cv::KeyPoint> keypoints;
+//    vector<cv::KeyPoint> keypoints;
     cv::FAST(outMat_gray, keypoints, n, true);
 
-    cv::drawKeypoints( inMat, keypoints, outMat, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+    cv::drawKeypoints( inMat, keypoints, outMat, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 }
 
 void FeaturesPts::set_method(const QString &str)
@@ -116,3 +116,7 @@ void FeaturesPts::set_thresh(const int &n)
     thresh = n;
 }
 
+const vector<cv::KeyPoint> &FeaturesPts::get_keypoints()const
+{
+    return keypoints;
+}

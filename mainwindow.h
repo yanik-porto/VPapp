@@ -11,6 +11,8 @@
 #include <opencv/cv.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/stitching.hpp>
+#include <opencv2/features2d.hpp>
 
 
 #include <stdarg.h>
@@ -141,6 +143,10 @@ private slots:
     void on_radioButton_img2_clicked(bool checked);
 
     void on_pushButton_rmv_clicked();
+
+    void on_pushButton_stitch_clicked();
+
+    void on_pushButton_match_clicked();
 
 public slots:
 

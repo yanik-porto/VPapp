@@ -69,11 +69,15 @@ public:
 
     void removeMethod(const int &ind);
 
+    void getKeypoints(vector<cv::KeyPoint> &, QString &);
+
+
 private:
     cv::Mat inI;
     cv::Mat outI;
 
     vector<ipmethod*> ipmethodList;
+    FeaturesPts *featPts;
 
 signals:
     void ImgReadyOut();

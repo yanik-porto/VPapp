@@ -503,3 +503,98 @@ void MainWindow::on_radioButton_img2_clicked(bool checked)
         }
     }
 }
+
+
+
+void MainWindow::on_pushButton_stitch_clicked()
+{
+    vector<cv::Mat> vImg;
+    cv::Mat rImg;
+
+    vImg.push_back(procEng->get_processedImg());
+    vImg.push_back(procEng2->get_processedImg());
+
+    cv::Stitcher stitcher = cv::Stitcher::createDefault();
+    cv::Stitcher::Status status = stitcher.stitch( vImg, rImg);
+
+    if(cv::Stitcher::OK == status)
+        show_cv("panorama", rImg, delay);
+    else
+        cout<<"panorama failed"<<endl;
+
+}
+
+void MainWindow::on_pushButton_match_clicked()
+{
+    cv::Mat img1 = procEng->get_originalImg();
+    cv::Mat img2 = procEng2->get_originalImg();
+//    cv::Mat outImg1, outImg2;
+    vector<cv::KeyPoint> keypts1, keypts2;
+
+    QString method1, method2;
+    procEng->getKeypoints(keypts1, method1);
+    procEng2->getKeypoints(keypts2, method2);
+    cout<<method1.toStdString()<<endl;
+    cv::Mat descriptors1, descriptors2;
+
+    if( method1.compare("SURF") == 0 && method2.compare("SURF") == 0)
+    {
+//        cv::Ptr<FeatureDetector> detector = SurfFeatureDetector::create( 2500 );
+        cv::Ptr<SURF> descFeat = SURF::create();
+        descFeat->compute(img1, keypts1, descriptors1);
+        descFeat->compute(img2, keypts2, descriptors2);
+    }
+
+    if( method1.compare("SIFT") == 0 && method2.compare("SIFT") == 0)
+    {
+//        cv::Ptr<FeatureDetector> detector = SiftFeatureDetector:
+        cv::Ptr<SIFT> descFeat = SIFT::create();
+        descFeat->compute(img1, keypts1, descriptors1);
+        descFeat->compute(img2, keypts2, descriptors2);
+    }
+
+//    if( method.compare("FAST") == 0 )
+//    {
+
+////        Check cookbook for FAST and apply also to Harris
+//    }
+//    detector->detect(img1, keypts1);
+//    detector->detect(img2, keypts2);
+
+//    drawKeypoints(img1, keypts1, outImg1, Scalar(255,255,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+//    drawKeypoints(img1, keypts2, outImg2, Scalar(255,255,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
+//    namedWindow("SURF detector img1");
+//    imshow("SURF detector img1", outImg1);
+
+//    namedWindow("SURF detector img2");
+//    imshow("SURF detector img2", outImg2);
+
+//    cv::Ptr<SURF> surfDesc = SURF::create();
+//    descFeat->compute(img1, keypts1, descriptors1);
+//    descFeat->compute(img2, keypts2, descriptors2);
+
+//    cv::BFMatcher matcher();
+//    cv::Ptr<cv::DescriptorMatcher> matcher = cv::BFMatcher::create(cv::L2<float>);
+
+
+    if(keypts1.size() != 0)
+    {
+        BFMatcher matcher(NORM_L2);
+        vector<cv::DMatch> matches;
+        matcher.match(descriptors1,descriptors2, matches);
+
+        nth_element(matches.begin(), matches.begin()+24, matches.end());
+        matches.erase(matches.begin()+25, matches.end());
+
+        Mat imageMatches;
+        drawMatches(img1, keypts1, img2, keypts2, matches, imageMatches, Scalar(255,255,255));
+
+        namedWindow("Matched");
+        imshow("Matched", imageMatches);
+
+        cv::waitKey(delay);
+    }
+
+
+}

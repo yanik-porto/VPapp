@@ -10,6 +10,7 @@ class FeaturesPts : public ipmethod
 private:
     QString method;
     int thresh;
+    vector<cv::KeyPoint> keypoints;
 
 public:
     FeaturesPts();
@@ -21,6 +22,8 @@ public:
     void set_thresh(const int &);
     const QString &get_method() const {return method;}
     const int &get_thresh() const {return thresh;}
+
+    const vector<cv::KeyPoint> &get_keypoints() const;
 
     void process(cv::Mat &, cv::Mat &);
 

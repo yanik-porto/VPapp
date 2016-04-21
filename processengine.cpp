@@ -37,7 +37,6 @@ void processEngine::addProcess(const QString &str, va_list args)
     ipmethod *method;
 
 
-
     if(str.compare("flip")==0)
     {
       int flipCode = va_arg( args, int);
@@ -148,19 +147,25 @@ void processEngine::addProcess(const QString &str, va_list args)
     if(str.compare("SURF")==0)
     {
         int minHessian = va_arg( args, int );
-        method = new FeaturesPts( str, minHessian );
+        featPts = new FeaturesPts( str, minHessian );
+        method = featPts;
+//        method = new FeaturesPts( str, minHessian );
     }
 
     if(str.compare("SIFT")==0)
     {
         int nPts = va_arg( args, int );
-        method = new FeaturesPts( str, nPts );
+//        method = new FeaturesPts( str, nPts );
+        featPts = new FeaturesPts( str, nPts );
+        method = featPts;
     }
 
     if(str.compare("FAST")==0)
     {
         int thresh = va_arg( args, int );
-        method = new FeaturesPts( str, thresh );
+//        method = new FeaturesPts( str, thresh );
+        featPts = new FeaturesPts( str, thresh );
+        method = featPts;
     }
 
     ipmethodList.push_back(method);
@@ -211,4 +216,29 @@ void processEngine::removeMethod(const int &ind)
 {
     ipmethodList.erase( ipmethodList.begin() + ind );
     process();
+}
+
+
+
+
+void processEngine::getKeypoints(vector<cv::KeyPoint> &keypoints, QString &method)
+{
+    vector<ipmethod*>::iterator it;
+//    int i=0;
+    for ( it=ipmethodList.begin(); it!=ipmethodList.end(); it++)
+    {
+        if(dynamic_cast<FeaturesPts*>(*it))
+        {
+            cout<<"Features detected"<<endl;
+            keypoints = featPts->get_keypoints();
+            method = featPts->get_method();
+        }
+
+        else
+            cout<<"No features detected"<<endl;
+
+//        i++;
+    }
+
+
 }
