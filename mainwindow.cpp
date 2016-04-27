@@ -11,9 +11,10 @@ MainWindow::MainWindow(QWidget *parent) :
     inFrame("Input"),
     outFrame("Output"),
     outFrame2("Output2"),
-    cap(0),
     delay(10),
-    selectImg(1)
+    selectImg(1),
+    calibrationEnabled(false),
+    nCorners(0)
 {
     ui->setupUi(this);
     screen = QApplication::desktop()->screenGeometry();cout<<screen.height()<<endl;
@@ -34,6 +35,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listWidget_process_2->setEnabled(false);
     ui->label_img1->setEnabled(true);
     ui->label_img2->setEnabled(false);
+
+//    CvCapture* capture = cvCaptureFromCAM( CV_CAP_DSHOW);
+//    capture->VI.listDevices();
+//    for(int device = 0; device<10; device++)
+//    {
+//        VideoCapture capTry(device);
+//        if (!capTry.isOpened())
+//            ui->comboBox_devices->addItem(QString::number(device));
+
+//    }
+
+    for(int i=-1; i<4; i++)
+    {
+        ui->comboBox_devices->addItem(QString::number(i));
+    }
+//    libusb_device** usbdevices;
+
+//    int list = libusb_get_device_list(NULL, &usbdevices);
 }
 
 MainWindow::~MainWindow()
@@ -111,10 +130,16 @@ void MainWindow::Display_inImg()
     switch(selectImg)
     {
     case 1:
-        ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+        if(!originalImg.isNull())
+            ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+        else
+            ui->label_inputI->setPixmap(NULL);
         break;
     case 2:
-        ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg2.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+        if(!originalImg2.isNull())
+            ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg2.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+        else
+            ui->label_inputI->setPixmap(NULL);
         break;
     default:
         break;
@@ -126,8 +151,16 @@ void MainWindow::Display_outImg()
     switch(selectImg)
     {
     case 1: show_cv(outFrame,procEng->get_processedImg(),delay);
+        if(!ui->lineEdit_width->isActiveWindow())
+            ui->lineEdit_width->setText(QString::number(procEng->get_processedImg().cols));
+        if(!ui->lineEdit_height->isActiveWindow())
+            ui->lineEdit_height->setText(QString::number(procEng->get_processedImg().rows));
         break;
     case 2: show_cv(outFrame2, procEng2->get_processedImg(), delay);
+        if(!ui->lineEdit_width->isActiveWindow())
+            ui->lineEdit_width->setText(QString::number(procEng2->get_processedImg().cols));
+        if(!ui->lineEdit_height->isActiveWindow())
+            ui->lineEdit_height->setText(QString::number(procEng2->get_processedImg().rows));
         break;
     default:
         break;
@@ -190,30 +223,103 @@ void MainWindow::on_pushButton_open_clicked()
 
 void MainWindow::on_pushButton_webcam_clicked()
 {
-    Mat frame,flipped,resized,img,blurred,edges;
+    Mat frame;
     int ch,delay=10;
+    int device = ui->comboBox_devices->currentText().toInt();
+    bool detectedCorners = false;
 
-    while(cap.read(frame))
+    switch(selectImg)
     {
-//        ch = show_cv("Input", frame, delay);
-//        Canny(frame, edges, 50, 150);
-//        ch = show_cv("Canny",edges,delay);
-        procEng->loadImg(frame);
-        cv::cvtColor( frame, frame, CV_BGR2RGB );
-        originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
-        qInputImageReady();
-        ch = cv::waitKey(delay);
-        if (ch == 27) break;
+    case 1:
+        cap.open(device);
+
+        while(cap.read(frame))
+        {
+            if(calibrationEnabled)
+            {
+                if(nCorners<=5)
+                    detectedCorners = findCorners(object_points, image_points, frame);
+
+                if(detectedCorners)
+                    nCorners++;
+
+                if(nCorners>5)
+                {
+                    frame = calibrateAndUndistort(object_points, image_points, frame);
+                    cv::destroyWindow("calibration");
+                }
+            }
+            detectedCorners = false;
+
+            procEng->loadImg(frame);
+            cv::cvtColor( frame, frame, CV_BGR2RGB );
+            originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
+            qInputImageReady();
+            ch = cv::waitKey(delay);
+            if (ch == 27) break;
+
+        }
+        break;
+
+    case 2:
+        cap2.open(device);
+        while(cap2.read(frame))
+        {
+            if(calibrationEnabled)
+            {
+                if(nCorners<=5)
+                    detectedCorners = findCorners(object_points, image_points, frame);
+
+                if(detectedCorners)
+                    nCorners++;
+
+                if(nCorners>5)
+                {
+                    frame = calibrateAndUndistort(object_points, image_points, frame);
+                    cv::destroyWindow("calibration");
+                }
+            }
+            detectedCorners = false;
+
+            procEng2->loadImg(frame);
+            cv::cvtColor( frame, frame, CV_BGR2RGB );
+            originalImg2=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
+            qInputImageReady();
+            ch = cv::waitKey(delay);
+            if (ch == 27) break;
+        }
+        break;
+
+    default:
+        break;
     }
 }
 
 void MainWindow::on_pushButton_stopcam_clicked()
 {
-    if(cap.isOpened())
+    switch(selectImg)
     {
-        cap.release();
+    case 1:
+        if(cap.isOpened())
+        {
+            cap.release();
+        }
+        break;
+    case 2:
+        if(cap2.isOpened())
+        {
+            cap2.release();
+        }
+        break;
+    default:
+        break;
     }
+
 }
+
+
+
+
 
 void MainWindow::on_pushButton_reset_clicked()
 {
@@ -476,13 +582,18 @@ void MainWindow::on_radioButton_img1_clicked(bool checked)
     {
         if(selectImg == 2)
         {
+
+            if(cap.isOpened())
+                cap.release();
+
             selectImg = 1;
+
             emit qInputImageReady();
             cout<<"image 1 selected"<<endl;
             ui->label_img1->setEnabled(true);
             ui->label_img2->setEnabled(false);
             ui->listWidget_process->setEnabled(true);
-            ui->listWidget_process_2->setEnabled(false);
+            ui->listWidget_process_2->setEnabled(false);          
         }
     }
 }
@@ -492,8 +603,12 @@ void MainWindow::on_radioButton_img2_clicked(bool checked)
     if(checked == true)
     {
         if(selectImg == 1)
-        {
+        {            
+            if(cap2.isOpened())
+                cap2.release();
+
             selectImg = 2;
+
             emit qInputImageReady();
             cout<<"image 2 selected"<<endl;
             ui->label_img1->setEnabled(false);
@@ -558,30 +673,11 @@ void MainWindow::on_pushButton_match_clicked()
 
 ////        Check cookbook for FAST and apply also to Harris
 //    }
-//    detector->detect(img1, keypts1);
-//    detector->detect(img2, keypts2);
-
-//    drawKeypoints(img1, keypts1, outImg1, Scalar(255,255,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-//    drawKeypoints(img1, keypts2, outImg2, Scalar(255,255,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
-//    namedWindow("SURF detector img1");
-//    imshow("SURF detector img1", outImg1);
-
-//    namedWindow("SURF detector img2");
-//    imshow("SURF detector img2", outImg2);
-
-//    cv::Ptr<SURF> surfDesc = SURF::create();
-//    descFeat->compute(img1, keypts1, descriptors1);
-//    descFeat->compute(img2, keypts2, descriptors2);
-
-//    cv::BFMatcher matcher();
-//    cv::Ptr<cv::DescriptorMatcher> matcher = cv::BFMatcher::create(cv::L2<float>);
-
 
     if(keypts1.size() != 0)
     {
         BFMatcher matcher(NORM_L2);
-        vector<cv::DMatch> matches;
+//        vector<cv::DMatch> matches;
         matcher.match(descriptors1,descriptors2, matches);
 
         nth_element(matches.begin(), matches.begin()+24, matches.end());
@@ -597,4 +693,132 @@ void MainWindow::on_pushButton_match_clicked()
     }
 
 
+}
+
+
+void MainWindow::on_pushButton_FundMat_clicked()
+{
+    vector<cv::KeyPoint> keypts1, keypts2;
+    QString method1, method2;
+    procEng->getKeypoints(keypts1, method1);
+    procEng2->getKeypoints(keypts2, method2);
+
+    vector<Point2f> imgPts1, imgPts2;
+    for(unsigned int i=0; i<matches.size(); i++)
+    {
+        imgPts1.push_back(keypts1[matches[i].queryIdx].pt);
+        imgPts2.push_back(keypts2[matches[i].trainIdx].pt);
+    }
+
+    int methodFM;
+    if(ui->radioButton_7pts->isChecked())
+        methodFM = cv::FM_7POINT;
+    if(ui->radioButton_8pts->isChecked())
+        methodFM = cv::FM_8POINT;
+    if(ui->radioButton_ransac->isChecked())
+        methodFM = cv::FM_RANSAC;
+
+    cv::Mat F = findFundamentalMat(imgPts1, imgPts2, methodFM, 0.1, 0.99);
+    cout<<F<<endl;
+}
+
+void MainWindow::on_pushButton_epipol_clicked()
+{
+//    std::vector<cv::Vec<T2,3>> epilines1, epilines2;
+}
+
+void MainWindow::on_pushButton_calib_clicked()
+{
+    calibrationEnabled = !calibrationEnabled;
+    if(calibrationEnabled == true)
+    {
+        object_points.clear();
+        image_points.clear();
+        nCorners = 0;
+    }
+}
+
+bool MainWindow::findCorners(vector<vector<Point3f> > &object_points, vector<vector<Point2f> > &image_points, cv::Mat image)
+{
+//    int numBoards = 5;
+    int numCornersHor = 9;
+    int numCornersVer = 6;
+
+    int numSquares = numCornersHor * numCornersVer;
+    Size board_sz = Size(numCornersHor, numCornersVer);
+//    VideoCapture capture = VideoCapture(1);
+
+//    vector< vector<Point3f> > object_points;
+//    vector< vector<Point2f> > image_points;
+
+
+    vector<cv::Point2f> corners;
+    int successes=0;
+
+//    Mat image;
+    Mat gray_image;
+//    capture >> image;
+//    image = procEng->get_processedImg();
+
+    vector<cv::Point3f> obj;
+    for(int j=0;j<numSquares;j++)
+        obj.push_back(cv::Point3f(j/numCornersHor, j%numCornersHor, 0.0f));
+
+//    while(successes<numBoards)
+//    {
+        cv::cvtColor(image, gray_image, CV_BGR2GRAY);
+        bool found = cv::findChessboardCorners(image, board_sz, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS );
+
+        if(found)
+        {
+            cv::cornerSubPix(gray_image, corners, cv::Size(11, 11), cv::Size(-1,-1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.01));
+            cv::drawChessboardCorners(gray_image, board_sz, corners, found);
+        }
+
+//        imshow("win1", image);
+        imshow("calibration", gray_image);
+        cv::waitKey(1);
+
+        if(found!=0)
+        {
+            image_points.push_back(corners);
+            object_points.push_back(obj);
+            cout<<"Snap stored!"<<endl;
+
+//            successes++;
+
+//            if(successes>=numBoards)
+//                break;
+        }
+
+        return found;
+//    }
+}
+
+cv::Mat MainWindow::calibrateAndUndistort(const vector<vector<Point3f> > &object_points, const vector<vector<Point2f> > &image_points, const cv::Mat &image)
+{
+    cv::Mat intrinsic = cv::Mat(3, 3, CV_32FC1);
+    cv::Mat distCoeffs;
+    vector<cv::Mat> rvecs;
+    vector<cv::Mat> tvecs;
+
+    intrinsic.ptr<float>(0)[0] = 1;
+    intrinsic.ptr<float>(1)[1] = 1;
+
+    cv::calibrateCamera(object_points, image_points, image.size(), intrinsic, distCoeffs, rvecs, tvecs);
+
+    cv::Mat imageUndistorted;
+//    while(1)
+//    {
+//        capture >> image;
+//        image = procEng->get_processedImg();
+        undistort(image, imageUndistorted, intrinsic, distCoeffs);
+
+//        imshow("win1", image);
+//        imshow("win2", imageUndistorted);
+
+        return imageUndistorted;
+
+//        waitKey(1);
+//    }
 }

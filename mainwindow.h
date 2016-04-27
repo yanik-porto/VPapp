@@ -13,11 +13,13 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/stitching.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 
 #include <stdarg.h>
 #include <iostream>
 #include <vector>
+//#include "libusb-master/libusb/libusb.h"
 
 using namespace std;
 using namespace cv;
@@ -42,6 +44,10 @@ public:
 
     void updateListProcess(const QString &);
 
+    bool findCorners(vector< vector<Point3f> > &object_points, vector< vector<Point2f> > &image_points, Mat image);
+
+    cv::Mat calibrateAndUndistort(const vector< vector<Point3f> > &object_points, const vector< vector<Point2f> > &image_points, const Mat &image);
+
 private:
     Ui::MainWindow *ui;
 
@@ -57,7 +63,8 @@ private:
     string outFrame2;
     string inFrame;
 
-    VideoCapture cap;
+    cv::VideoCapture cap;
+    cv::VideoCapture cap2;
 
     int delay;
 
@@ -65,6 +72,14 @@ private:
     QImage originalImg2;
 
     short selectImg;
+
+    vector<cv::DMatch> matches;
+
+    bool calibrationEnabled;
+
+    vector< vector<Point3f> > object_points;
+    vector< vector<Point2f> > image_points;
+    int nCorners;
 
 signals:
     void qInputImageReady();
@@ -147,6 +162,12 @@ private slots:
     void on_pushButton_stitch_clicked();
 
     void on_pushButton_match_clicked();
+
+    void on_pushButton_FundMat_clicked();
+
+    void on_pushButton_epipol_clicked();
+
+    void on_pushButton_calib_clicked();
 
 public slots:
 
