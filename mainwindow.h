@@ -169,6 +169,8 @@ private slots:
 
     void on_pushButton_calib_clicked();
 
+    void on_pushButton_video_clicked();
+
 public slots:
 
 

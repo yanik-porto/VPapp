@@ -223,7 +223,7 @@ void MainWindow::on_pushButton_open_clicked()
 
 void MainWindow::on_pushButton_webcam_clicked()
 {
-    Mat frame;
+    cv::Mat frame;
     int ch,delay=10;
     int device = ui->comboBox_devices->currentText().toInt();
     bool detectedCorners = false;
@@ -232,7 +232,6 @@ void MainWindow::on_pushButton_webcam_clicked()
     {
     case 1:
         cap.open(device);
-
         while(cap.read(frame))
         {
             if(calibrationEnabled)
@@ -317,6 +316,50 @@ void MainWindow::on_pushButton_stopcam_clicked()
 
 }
 
+void MainWindow::on_pushButton_video_clicked()
+{
+    //Get path to video and read video into cv matrix
+    QString filename = QFileDialog::getOpenFileName();
+    cv::Mat frame;
+    int ch,delay=10;
+
+    if(filename.compare("")!=0)
+    {
+        switch(selectImg)
+        {
+        case 1: cap.open(filename.toStdString());
+            while(cap.read(frame))
+            {
+                procEng->loadImg(frame);
+                cv::cvtColor( frame, frame, CV_BGR2RGB );
+                originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
+                qInputImageReady();
+                ch = cv::waitKey(delay);
+                if (ch == 27) break;
+            }
+            break;
+        case 2:
+            cap2.open(filename.toStdString());
+            while(cap2.read(frame))
+            {
+                procEng2->loadImg(frame);
+                cv::cvtColor( frame, frame, CV_BGR2RGB );
+                originalImg2=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
+                qInputImageReady();
+                ch = cv::waitKey(delay);
+                if (ch == 27) break;
+            }
+            break;
+        default:
+            break;
+        }
+
+        //Display the input image in the GUI
+//        originalImg = QImage(filename);
+
+        emit qInputImageReady();
+    }
+}
 
 
 
@@ -740,59 +783,41 @@ void MainWindow::on_pushButton_calib_clicked()
 
 bool MainWindow::findCorners(vector<vector<Point3f> > &object_points, vector<vector<Point2f> > &image_points, cv::Mat image)
 {
-//    int numBoards = 5;
     int numCornersHor = 9;
     int numCornersVer = 6;
 
     int numSquares = numCornersHor * numCornersVer;
     Size board_sz = Size(numCornersHor, numCornersVer);
-//    VideoCapture capture = VideoCapture(1);
-
-//    vector< vector<Point3f> > object_points;
-//    vector< vector<Point2f> > image_points;
-
 
     vector<cv::Point2f> corners;
     int successes=0;
 
-//    Mat image;
     Mat gray_image;
-//    capture >> image;
-//    image = procEng->get_processedImg();
 
     vector<cv::Point3f> obj;
     for(int j=0;j<numSquares;j++)
         obj.push_back(cv::Point3f(j/numCornersHor, j%numCornersHor, 0.0f));
 
-//    while(successes<numBoards)
-//    {
-        cv::cvtColor(image, gray_image, CV_BGR2GRAY);
-        bool found = cv::findChessboardCorners(image, board_sz, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS );
+    cv::cvtColor(image, gray_image, CV_BGR2GRAY);
+    bool found = cv::findChessboardCorners(image, board_sz, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS );
 
-        if(found)
-        {
-            cv::cornerSubPix(gray_image, corners, cv::Size(11, 11), cv::Size(-1,-1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.01));
-            cv::drawChessboardCorners(gray_image, board_sz, corners, found);
-        }
+    if(found)
+    {
+        cv::cornerSubPix(gray_image, corners, cv::Size(11, 11), cv::Size(-1,-1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.01));
+        cv::drawChessboardCorners(gray_image, board_sz, corners, found);
+    }
 
-//        imshow("win1", image);
-        imshow("calibration", gray_image);
-        cv::waitKey(1);
+    imshow("calibration", gray_image);
+    cv::waitKey(1);
 
-        if(found!=0)
-        {
-            image_points.push_back(corners);
-            object_points.push_back(obj);
-            cout<<"Snap stored!"<<endl;
+    if(found!=0)
+    {
+        image_points.push_back(corners);
+        object_points.push_back(obj);
+        cout<<"Snap stored!"<<endl;
+    }
 
-//            successes++;
-
-//            if(successes>=numBoards)
-//                break;
-        }
-
-        return found;
-//    }
+    return found;
 }
 
 cv::Mat MainWindow::calibrateAndUndistort(const vector<vector<Point3f> > &object_points, const vector<vector<Point2f> > &image_points, const cv::Mat &image)
@@ -808,17 +833,7 @@ cv::Mat MainWindow::calibrateAndUndistort(const vector<vector<Point3f> > &object
     cv::calibrateCamera(object_points, image_points, image.size(), intrinsic, distCoeffs, rvecs, tvecs);
 
     cv::Mat imageUndistorted;
-//    while(1)
-//    {
-//        capture >> image;
-//        image = procEng->get_processedImg();
-        undistort(image, imageUndistorted, intrinsic, distCoeffs);
+    cv::undistort(image, imageUndistorted, intrinsic, distCoeffs);
 
-//        imshow("win1", image);
-//        imshow("win2", imageUndistorted);
-
-        return imageUndistorted;
-
-//        waitKey(1);
-//    }
+    return imageUndistorted;
 }
