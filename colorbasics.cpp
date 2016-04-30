@@ -31,6 +31,21 @@ void colorBasics::process(cv::Mat &inMat, cv::Mat &outMat)
     {
         equalize( inMat, outMat );
     }
+
+    if( method.compare("2rgb") == 0 )
+    {
+        convertToRGB( inMat, outMat );
+    }
+
+    if( method.compare("2hsv") == 0 )
+    {
+        convertToHSV( inMat, outMat );
+    }
+
+    if( method.compare("2gray") == 0 )
+    {
+        convertToGRAY( inMat, outMat );
+    }
 }
 
 void colorBasics::invert(cv::Mat &inMat, cv::Mat &outMat)
@@ -46,6 +61,21 @@ void colorBasics::equalize(cv::Mat &inMat, cv::Mat &outMat)
     cv::equalizeHist(bgr_planes[1],bgr_planes[1]);
     cv::equalizeHist(bgr_planes[2],bgr_planes[2]);
     cv::merge(bgr_planes,outMat);
+}
+
+void colorBasics::convertToRGB(cv::Mat &inMat, cv::Mat &outMat)
+{
+    cv::cvtColor(inMat, outMat, CV_BGR2RGB);
+}
+
+void colorBasics::convertToHSV(cv::Mat &inMat, cv::Mat &outMat)
+{
+    cv::cvtColor(inMat, outMat, CV_BGR2HSV);
+}
+
+void colorBasics::convertToGRAY(cv::Mat &inMat, cv::Mat &outMat)
+{
+    cv::cvtColor(inMat, outMat, CV_BGR2GRAY);
 }
 
 void colorBasics::set_method(const QString &str)

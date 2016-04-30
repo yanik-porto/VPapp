@@ -19,6 +19,9 @@ public:
 
     void invert( cv::Mat &, cv::Mat &);
     void equalize( cv::Mat &, cv::Mat &);
+    void convertToRGB( cv::Mat &, cv::Mat & );
+    void convertToHSV( cv::Mat &, cv::Mat & );
+    void convertToGRAY( cv::Mat &, cv::Mat & );
 
     void process(cv::Mat &, cv::Mat &);
 };

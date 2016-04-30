@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(this,SIGNAL(qInputImageReady()),this,SLOT(Display_inImg()));
     QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
-    QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
+//    QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
 
     QObject::connect(procEng2, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
 
@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listWidget_process_2->setEnabled(false);
     ui->label_img1->setEnabled(true);
     ui->label_img2->setEnabled(false);
+
+//    Disable_widgets("");
 
 //    CvCapture* capture = cvCaptureFromCAM( CV_CAP_DSHOW);
 //    capture->VI.listDevices();
@@ -169,7 +171,7 @@ void MainWindow::Display_outImg()
 
 }
 
-void MainWindow::Disable_widgets()
+void MainWindow::Disable_widgets(const QString &mode)
 {
     int type_img = procEng->get_processedImg().type();
 
@@ -185,7 +187,50 @@ void MainWindow::Disable_widgets()
         ui->pushButton_hist->setEnabled(true);
         ui->pushButton_eq->setEnabled(true);
         break;
-    default: break;
+    default:
+        ui->tabWidget->widget(2)->setEnabled(true);
+        ui->pushButton_hist->setEnabled(true);
+        ui->pushButton_eq->setEnabled(true);
+        break;
+    }
+
+    vector<cv::KeyPoint> keypts1, keypts2;
+    QString method1, method2;
+    procEng->getKeypoints(keypts1,method1);
+    procEng->getKeypoints(keypts1,method2);
+    if((keypts1.size() !=0 ) && (keypts2.size()) !=0 && (method1.compare(method2)==0))
+    {
+        ui->pushButton_match->setEnabled(true);
+//        ui->pushButton_FundMat->setEnabled();
+    }
+    else
+    {
+       ui->pushButton_match->setEnabled(false);
+       ui->pushButton_FundMat->setEnabled(false);
+    }
+
+
+
+    if(mode.compare("reading")==0)
+    {
+        ui->pushButton_open->setEnabled(false);
+        ui->pushButton_video->setEnabled(false);
+        ui->pushButton_webcam->setEnabled(false);
+        ui->radioButton_img1->setEnabled(false);
+        ui->radioButton_img2->setEnabled(false);
+        ui->pushButton_match->setEnabled(false);
+        ui->pushButton_stitch->setEnabled(false);
+    }
+
+    if(mode.compare("stop")==0)
+    {
+        ui->pushButton_open->setEnabled(true);
+        ui->pushButton_video->setEnabled(true);
+        ui->pushButton_webcam->setEnabled(true);
+        ui->radioButton_img1->setEnabled(true);
+        ui->radioButton_img2->setEnabled(true);
+        ui->pushButton_match->setEnabled(true);
+        ui->pushButton_stitch->setEnabled(true);
     }
 
 }
@@ -255,7 +300,13 @@ void MainWindow::on_pushButton_webcam_clicked()
             originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
             qInputImageReady();
             ch = cv::waitKey(delay);
-            if (ch == 27) break;
+            if (ch == 27)
+            {
+                Disable_widgets("stop");
+                break;
+            }
+
+            Disable_widgets("reading");
 
         }
         break;
@@ -285,7 +336,13 @@ void MainWindow::on_pushButton_webcam_clicked()
             originalImg2=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
             qInputImageReady();
             ch = cv::waitKey(delay);
-            if (ch == 27) break;
+            if (ch == 27)
+            {
+                Disable_widgets("stop");
+                break;
+            }
+
+            Disable_widgets("reading");
         }
         break;
 
@@ -314,6 +371,7 @@ void MainWindow::on_pushButton_stopcam_clicked()
         break;
     }
 
+    Disable_widgets("stop");
 }
 
 void MainWindow::on_pushButton_video_clicked()
@@ -334,8 +392,13 @@ void MainWindow::on_pushButton_video_clicked()
                 cv::cvtColor( frame, frame, CV_BGR2RGB );
                 originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
                 qInputImageReady();
-                ch = cv::waitKey(delay);
-                if (ch == 27) break;
+                if (ch == 27)
+                {
+                    Disable_widgets("stop");
+                    break;
+                }
+
+                Disable_widgets("reading");
             }
             break;
         case 2:
@@ -347,7 +410,13 @@ void MainWindow::on_pushButton_video_clicked()
                 originalImg2=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
                 qInputImageReady();
                 ch = cv::waitKey(delay);
-                if (ch == 27) break;
+                if (ch == 27)
+                {
+                    Disable_widgets("stop");
+                    break;
+                }
+
+                Disable_widgets("reading");
             }
             break;
         default:
@@ -520,6 +589,24 @@ void MainWindow::on_pushButton_invert_clicked()
     updateListProcess("invert" );
 }
 
+void MainWindow::on_pushButton_2rgb_clicked()
+{
+    sendProcessRequest( selectImg, "2rgb" );
+    updateListProcess("to rgb");
+}
+
+void MainWindow::on_pushButton_2hsv_clicked()
+{
+    sendProcessRequest( selectImg, "2hsv" );
+    updateListProcess("to hsv");
+}
+
+void MainWindow::on_pushButton_2gray_clicked()
+{
+    sendProcessRequest( selectImg, "2gray" );
+    updateListProcess("to gray");
+}
+
 void MainWindow::on_pushButton_eq_clicked()
 {
     sendProcessRequest( selectImg, "equalize" );
@@ -578,6 +665,8 @@ void MainWindow::on_pushButton_surf_clicked()
     int thresh = ui->horizontalSlider_SURFThresh->value();
     sendProcessRequest( selectImg, "SURF", thresh );
     updateListProcess("SURF detector " + QString::number(thresh) );
+
+    Disable_widgets("");
 }
 
 void MainWindow::on_pushButton_sift_clicked()
@@ -585,6 +674,8 @@ void MainWindow::on_pushButton_sift_clicked()
     int nPts = ui->horizontalSlider_SIFTThresh->value();
     sendProcessRequest( selectImg, "SIFT", nPts );
     updateListProcess("SIFT detector " + QString::number(nPts) );
+
+    Disable_widgets("");
 }
 
 void MainWindow::on_pushButton_fast_clicked()
@@ -717,7 +808,7 @@ void MainWindow::on_pushButton_match_clicked()
 ////        Check cookbook for FAST and apply also to Harris
 //    }
 
-    if(keypts1.size() != 0)
+    if(keypts1.size() != 0 && keypts2.size() != 0)
     {
         BFMatcher matcher(NORM_L2);
 //        vector<cv::DMatch> matches;
@@ -837,3 +928,4 @@ cv::Mat MainWindow::calibrateAndUndistort(const vector<vector<Point3f> > &object
 
     return imageUndistorted;
 }
+

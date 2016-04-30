@@ -93,7 +93,7 @@ private slots:
 
     void Display_outImg();
 
-    void Disable_widgets();
+    void Disable_widgets(const QString &mode);
 
     /**
      * Slots for widget actions
@@ -170,6 +170,12 @@ private slots:
     void on_pushButton_calib_clicked();
 
     void on_pushButton_video_clicked();
+
+    void on_pushButton_2rgb_clicked();
+
+    void on_pushButton_2hsv_clicked();
+
+    void on_pushButton_2gray_clicked();
 
 public slots:
 

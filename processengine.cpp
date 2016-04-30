@@ -99,6 +99,21 @@ void processEngine::addProcess(const QString &str, va_list args)
         method= new colorBasics( str );
     }
 
+    if(str.compare("2rgb")==0)
+    {
+        method = new colorBasics( str );
+    }
+
+    if(str.compare("2hsv")==0)
+    {
+        method = new colorBasics( str );
+    }
+
+    if(str.compare("2gray")==0)
+    {
+        method = new colorBasics( str );
+    }
+
     if(str.compare("equalize")==0)
     {
         method= new colorBasics( str );
