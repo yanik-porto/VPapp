@@ -101,7 +101,7 @@ private slots:
 
     void Display_outImg();
 
-    void Disable_widgets(const QString &mode);
+    void Disable_widgets();
 
     /**
      * Slots for widget actions

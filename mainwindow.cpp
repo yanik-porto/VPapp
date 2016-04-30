@@ -25,10 +25,14 @@ MainWindow::MainWindow(QWidget *parent) :
     procEng2 = new processEngine;
 
     QObject::connect(this,SIGNAL(qInputImageReady()),this,SLOT(Display_inImg()));
-    QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
-//    QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
 
+    QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
     QObject::connect(procEng2, SIGNAL(ImgReadyOut()), this, SLOT(Display_outImg()));
+
+    QObject::connect(procEng, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
+    QObject::connect(procEng2, SIGNAL(ImgReadyOut()), this, SLOT(Disable_widgets()));
+
+
 
     cv::moveWindow(outFrame,screen.width()/2,0);
 
@@ -37,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_img1->setEnabled(true);
     ui->label_img2->setEnabled(false);
 
-//    Disable_widgets("");
+    Disable_widgets();
 
 //    CvCapture* capture = cvCaptureFromCAM( CV_CAP_DSHOW);
 //    capture->VI.listDevices();
@@ -180,48 +184,48 @@ void MainWindow::Display_outImg()
 
 }
 
-void MainWindow::Disable_widgets(const QString &mode)
+void MainWindow::Disable_widgets()
 {
-    int type_img = procEng->get_processedImg().type();
+//    int type_img = procEng->get_processedImg().type();
 
-    switch(type_img)
+//    switch(type_img)
+//    {
+//    case 0 :
+//        ui->tabWidget->widget(2)->setEnabled(false);
+//        ui->pushButton_hist->setEnabled(false);
+//        ui->pushButton_eq->setEnabled(false);
+//        break;
+//    case 16 :
+//        ui->tabWidget->widget(2)->setEnabled(true);
+//        ui->pushButton_hist->setEnabled(true);
+//        ui->pushButton_eq->setEnabled(true);
+//        break;
+//    default:
+//        ui->tabWidget->widget(2)->setEnabled(true);
+//        ui->pushButton_hist->setEnabled(true);
+//        ui->pushButton_eq->setEnabled(true);
+//        break;
+//    }
+
+    if(mode.compare("Init")==0)
     {
-    case 0 :
-        ui->tabWidget->widget(2)->setEnabled(false);
-        ui->pushButton_hist->setEnabled(false);
-        ui->pushButton_eq->setEnabled(false);
-        break;
-    case 16 :
-        ui->tabWidget->widget(2)->setEnabled(true);
-        ui->pushButton_hist->setEnabled(true);
-        ui->pushButton_eq->setEnabled(true);
-        break;
-    default:
-        ui->tabWidget->widget(2)->setEnabled(true);
-        ui->pushButton_hist->setEnabled(true);
-        ui->pushButton_eq->setEnabled(true);
-        break;
+        ui->tabWidget->setEnabled(false);
+        ui->pushButton_stopcam->setEnabled(false);
+        ui->pushButton_stopRec->setEnabled(false);
+        ui->pushButton_save->setEnabled(false);
+        ui->pushButton_reset->setEnabled(false);
+        ui->pushButton_rmv->setEnabled(false);
     }
 
-    vector<cv::KeyPoint> keypts1, keypts2;
-    QString method1, method2;
-    procEng->getKeypoints(keypts1,method1);
-    procEng->getKeypoints(keypts1,method2);
-    if((keypts1.size() !=0 ) && (keypts2.size()) !=0 && (method1.compare(method2)==0))
+    if(mode.compare("Stream")==0)
     {
-        ui->pushButton_match->setEnabled(true);
-//        ui->pushButton_FundMat->setEnabled();
-    }
-    else
-    {
-       ui->pushButton_match->setEnabled(false);
-//       ui->pushButton_FundMat->setEnabled(false);
-    }
+        ui->tabWidget->setEnabled(true);
+        ui->pushButton_stopcam->setEnabled(true);
+        ui->pushButton_stopRec->setEnabled(true);
+        ui->pushButton_save->setEnabled(true);
+        ui->pushButton_reset->setEnabled(true);
+        ui->pushButton_rmv->setEnabled(true);
 
-
-
-    if(mode.compare("reading")==0)
-    {
         ui->pushButton_open->setEnabled(false);
         ui->pushButton_video->setEnabled(false);
         ui->pushButton_webcam->setEnabled(false);
@@ -231,8 +235,15 @@ void MainWindow::Disable_widgets(const QString &mode)
         ui->pushButton_stitch->setEnabled(false);
     }
 
-    if(mode.compare("stop")==0)
+    if(mode.compare("Image")==0)
     {
+        ui->tabWidget->setEnabled(true);
+        ui->pushButton_stopcam->setEnabled(true);
+        ui->pushButton_stopRec->setEnabled(true);
+        ui->pushButton_save->setEnabled(true);
+        ui->pushButton_reset->setEnabled(true);
+        ui->pushButton_rmv->setEnabled(true);
+
         ui->pushButton_open->setEnabled(true);
         ui->pushButton_video->setEnabled(true);
         ui->pushButton_webcam->setEnabled(true);
@@ -242,6 +253,42 @@ void MainWindow::Disable_widgets(const QString &mode)
         ui->pushButton_stitch->setEnabled(true);
     }
 
+    vector<cv::KeyPoint> keypts1, keypts2;
+    QString method1, method2;
+    procEng->getKeypoints(keypts1,method1);
+    procEng->getKeypoints(keypts2,method2);
+    cout<<keypts1.size()<<endl;
+    cout<<keypts2.size()<<endl;
+    if((keypts1.size() !=0 ) && (keypts2.size() !=0) && (method1.compare(method2)==0))
+    {
+        ui->pushButton_match->setEnabled(true);
+        if(matches.size() != 0)
+        {
+            ui->pushButton_FundMat->setEnabled(true);
+            ui->pushButton_homo->setEnabled(true);
+        }
+    }
+    else
+    {
+       ui->pushButton_match->setEnabled(false);
+       ui->pushButton_FundMat->setEnabled(false);
+       ui->pushButton_homo->setEnabled(false);
+    }
+
+    if(F.rows>0)
+        ui->pushButton_epipol->setEnabled(true);
+    else
+        ui->pushButton_epipol->setEnabled(false);
+
+    if(H.rows>0)
+        ui->pushButton_warp->setEnabled(true);
+    else
+        ui->pushButton_warp->setEnabled(false);
+
+    if(procEng->get_processedImg().rows!=0 && procEng2->get_processedImg().rows!=0)
+        ui->pushButton_stitch->setEnabled(true);
+    else
+        ui->pushButton_stitch->setEnabled(false);
 }
 
 
@@ -315,15 +362,9 @@ void MainWindow::on_pushButton_webcam_clicked()
             ch = cv::waitKey(delay);
             if (ch == 27)
             {
-                Disable_widgets("stop");
-//                if(vidWriter.isOpened())
-//                    vidWriter.release();
+                mode = "Image";
                 break;
             }
-
-//            if(vidWriter.isOpened())
-//                vidWriter.write(frame);
-            Disable_widgets("reading");
 
         }
         break;
@@ -358,15 +399,10 @@ void MainWindow::on_pushButton_webcam_clicked()
             ch = cv::waitKey(delay);
             if (ch == 27)
             {
-                Disable_widgets("stop");
-//                if(vidWriter.isOpened())
-//                    vidWriter.release();
+                mode = "Image";
                 break;
             }
 
-//            if(vidWriter.isOpened())
-//                vidWriter.write(frame);
-            Disable_widgets("reading");
         }
         break;
 
@@ -395,7 +431,8 @@ void MainWindow::on_pushButton_stopcam_clicked()
         break;
     }
 
-    Disable_widgets("stop");
+    mode = "Image";
+    Disable_widgets();
 }
 
 void MainWindow::on_pushButton_video_clicked()
@@ -420,14 +457,9 @@ void MainWindow::on_pushButton_video_clicked()
                 qInputImageReady();
                 if (ch == 27)
                 {
-                    Disable_widgets("stop");
-//                    if(vidWriter.isOpened())
-//                        vidWriter.release();
+                    mode = "Image";
                     break;
                 }
-
-//                vidWriter.write(frame);
-                Disable_widgets("reading");
             }
             break;
         case 2:
@@ -443,23 +475,14 @@ void MainWindow::on_pushButton_video_clicked()
                 ch = cv::waitKey(delay);
                 if (ch == 27)
                 {
-                    Disable_widgets("stop");
-//                    if(vidWriter.isOpened())
-//                        vidWriter.release();
+                    mode = "Image";
                     break;
                 }
-
-//                if(vidWriter.isOpened())
-//                    vidWriter.write(frame);
-                Disable_widgets("reading");
             }
             break;
         default:
             break;
         }
-
-        //Display the input image in the GUI
-//        originalImg = QImage(filename);
 
         emit qInputImageReady();
     }
@@ -746,8 +769,6 @@ void MainWindow::on_pushButton_surf_clicked()
     int thresh = ui->horizontalSlider_SURFThresh->value();
     sendProcessRequest( selectImg, "SURF", thresh );
     updateListProcess("SURF detector " + QString::number(thresh) );
-
-    Disable_widgets("");
 }
 
 void MainWindow::on_pushButton_sift_clicked()
@@ -755,8 +776,6 @@ void MainWindow::on_pushButton_sift_clicked()
     int nPts = ui->horizontalSlider_SIFTThresh->value();
     sendProcessRequest( selectImg, "SIFT", nPts );
     updateListProcess("SIFT detector " + QString::number(nPts) );
-
-    Disable_widgets("");
 }
 
 void MainWindow::on_pushButton_fast_clicked()
@@ -915,6 +934,7 @@ void MainWindow::on_pushButton_match_clicked()
         cv::waitKey(delay);
     }
 
+    Disable_widgets();
 
 }
 
@@ -945,6 +965,10 @@ void MainWindow::on_pushButton_FundMat_clicked()
     cout<<F<<endl;
     if(F.rows!=0)
         ui->label_infos->setText("F computed");
+    else
+        ui->label_infos->setText("F failed");
+
+    Disable_widgets();
 }
 
 void MainWindow::on_pushButton_epipol_clicked()
@@ -1105,6 +1129,11 @@ void MainWindow::on_pushButton_homo_clicked()
     cout<<H<<endl;
     if(H.rows!=0)
         ui->label_infos->setText("H computed");
+    else
+        ui->label_infos->setText("H failed");
+
+    Disable_widgets();
+
 }
 
 
