@@ -14,7 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     delay(10),
     selectImg(1),
     calibrationEnabled(false),
-    nCorners(0)
+    nCorners(0),
+    mode("Init")
 {
     ui->setupUi(this);
     screen = QApplication::desktop()->screenGeometry();cout<<screen.height()<<endl;
@@ -157,16 +158,24 @@ void MainWindow::Display_outImg()
             ui->lineEdit_width->setText(QString::number(procEng->get_processedImg().cols));
         if(!ui->lineEdit_height->isActiveWindow())
             ui->lineEdit_height->setText(QString::number(procEng->get_processedImg().rows));
+
+        if(vidWriter.isOpened())
+            vidWriter.write(procEng->get_processedImg());
         break;
     case 2: show_cv(outFrame2, procEng2->get_processedImg(), delay);
         if(!ui->lineEdit_width->isActiveWindow())
             ui->lineEdit_width->setText(QString::number(procEng2->get_processedImg().cols));
         if(!ui->lineEdit_height->isActiveWindow())
             ui->lineEdit_height->setText(QString::number(procEng2->get_processedImg().rows));
+
+        if(vidWriter.isOpened())
+            vidWriter.write(procEng2->get_processedImg());
         break;
     default:
         break;
     }
+
+
 
 
 }
@@ -246,6 +255,9 @@ void MainWindow::on_pushButton_open_clicked()
     QString filename = QFileDialog::getOpenFileName();
     if(filename.compare("")!=0)
     {
+        mode = "Image";
+        ui->label_infos->setText(mode);
+
         I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
         switch(selectImg)
         {
@@ -260,8 +272,6 @@ void MainWindow::on_pushButton_open_clicked()
         }
 
         //Display the input image in the GUI
-//        originalImg = QImage(filename);
-
         emit qInputImageReady();
     }
 }
@@ -279,6 +289,9 @@ void MainWindow::on_pushButton_webcam_clicked()
         cap.open(device);
         while(cap.read(frame))
         {
+            mode = "Stream";
+            ui->label_infos->setText("Stream");
+
             if(calibrationEnabled)
             {
                 if(nCorners<=5)
@@ -303,9 +316,13 @@ void MainWindow::on_pushButton_webcam_clicked()
             if (ch == 27)
             {
                 Disable_widgets("stop");
+//                if(vidWriter.isOpened())
+//                    vidWriter.release();
                 break;
             }
 
+//            if(vidWriter.isOpened())
+//                vidWriter.write(frame);
             Disable_widgets("reading");
 
         }
@@ -315,6 +332,9 @@ void MainWindow::on_pushButton_webcam_clicked()
         cap2.open(device);
         while(cap2.read(frame))
         {
+            mode = "Stream";
+            ui->label_infos->setText("Stream");
+
             if(calibrationEnabled)
             {
                 if(nCorners<=5)
@@ -339,9 +359,13 @@ void MainWindow::on_pushButton_webcam_clicked()
             if (ch == 27)
             {
                 Disable_widgets("stop");
+//                if(vidWriter.isOpened())
+//                    vidWriter.release();
                 break;
             }
 
+//            if(vidWriter.isOpened())
+//                vidWriter.write(frame);
             Disable_widgets("reading");
         }
         break;
@@ -388,6 +412,8 @@ void MainWindow::on_pushButton_video_clicked()
         case 1: cap.open(filename.toStdString());
             while(cap.read(frame))
             {
+                mode = "Stream";
+                ui->label_infos->setText("Stream");
                 procEng->loadImg(frame);
                 cv::cvtColor( frame, frame, CV_BGR2RGB );
                 originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
@@ -395,9 +421,12 @@ void MainWindow::on_pushButton_video_clicked()
                 if (ch == 27)
                 {
                     Disable_widgets("stop");
+//                    if(vidWriter.isOpened())
+//                        vidWriter.release();
                     break;
                 }
 
+//                vidWriter.write(frame);
                 Disable_widgets("reading");
             }
             break;
@@ -405,6 +434,8 @@ void MainWindow::on_pushButton_video_clicked()
             cap2.open(filename.toStdString());
             while(cap2.read(frame))
             {
+                mode = "Stream";
+                ui->label_infos->setText("Stream");
                 procEng2->loadImg(frame);
                 cv::cvtColor( frame, frame, CV_BGR2RGB );
                 originalImg2=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
@@ -413,9 +444,13 @@ void MainWindow::on_pushButton_video_clicked()
                 if (ch == 27)
                 {
                     Disable_widgets("stop");
+//                    if(vidWriter.isOpened())
+//                        vidWriter.release();
                     break;
                 }
 
+//                if(vidWriter.isOpened())
+//                    vidWriter.write(frame);
                 Disable_widgets("reading");
             }
             break;
@@ -430,7 +465,47 @@ void MainWindow::on_pushButton_video_clicked()
     }
 }
 
+void MainWindow::on_pushButton_save_clicked()
+{
+    QString saveFileName = QFileDialog::getSaveFileName();
 
+    if( saveFileName.compare("")!=0 )
+    {
+        if( mode.compare("Image")==0 )
+        {
+            switch(selectImg)
+            {
+            case 1: cv::imwrite(saveFileName.toStdString(), procEng->get_processedImg());
+                break;
+            case 2: cv::imwrite(saveFileName.toStdString(), procEng2->get_processedImg());
+                break;
+            default:
+                break;
+            }
+
+        }
+
+        else if( mode.compare("Stream")==0 )
+        {
+            switch(selectImg)
+            {
+            case 1: vidWriter.open(saveFileName.toStdString(), cap.get(CV_CAP_PROP_FOURCC), cap.get(CV_CAP_PROP_FPS), Size(cap.get(CV_CAP_PROP_FRAME_WIDTH), cap.get(CV_CAP_PROP_FRAME_HEIGHT)) );
+                break;
+            case 2: vidWriter.open(saveFileName.toStdString(), cap2.get(CV_CAP_PROP_FOURCC), cap2.get(CV_CAP_PROP_FPS), Size(cap2.get(CV_CAP_PROP_FRAME_WIDTH), cap2.get(CV_CAP_PROP_FRAME_HEIGHT)) );
+                break;
+            default:
+                break;
+            }
+
+        }
+    }
+}
+
+void MainWindow::on_pushButton_stopRec_clicked()
+{
+    if(vidWriter.isOpened())
+        vidWriter.release();
+}
 
 
 void MainWindow::on_pushButton_reset_clicked()
@@ -646,6 +721,12 @@ void MainWindow::on_pushButton_circles_clicked()
     updateListProcess("hough circles " + QString::number(thresh) );
 }
 
+void MainWindow::on_pushButton_contours_clicked()
+{
+    sendProcessRequest( selectImg, "contours" );
+    updateListProcess("contours");
+}
+
 void MainWindow::on_pushButton_lines_clicked()
 {
     int thresh = ui->horizontalSlider_lineThresh->value();
@@ -767,9 +848,17 @@ void MainWindow::on_pushButton_stitch_clicked()
     cv::Stitcher::Status status = stitcher.stitch( vImg, rImg);
 
     if(cv::Stitcher::OK == status)
+    {
         show_cv("panorama", rImg, delay);
+        ui->label_infos->setText("Panorama successed");
+    }
+
     else
+    {
         cout<<"panorama failed"<<endl;
+        ui->label_infos->setText("Panorama failed");
+    }
+
 
 }
 
@@ -854,6 +943,8 @@ void MainWindow::on_pushButton_FundMat_clicked()
 
     F = findFundamentalMat(imgPts1, imgPts2, methodFM, 0.1, 0.99);
     cout<<F<<endl;
+    if(F.rows!=0)
+        ui->label_infos->setText("F computed");
 }
 
 void MainWindow::on_pushButton_epipol_clicked()
@@ -961,6 +1052,7 @@ bool MainWindow::findCorners(vector<vector<Point3f> > &object_points, vector<vec
         image_points.push_back(corners);
         object_points.push_back(obj);
         cout<<"Snap stored!"<<endl;
+        ui->label_infos->setText("Snap stored! " + QString::number(nCorners));
     }
 
     return found;
@@ -1010,6 +1102,9 @@ void MainWindow::on_pushButton_homo_clicked()
 
     std::vector<uchar>	inliers(imgPts1.size(),0);
     H = cv::findHomography(imgPts1, imgPts2, inliers, methodHM );
+    cout<<H<<endl;
+    if(H.rows!=0)
+        ui->label_infos->setText("H computed");
 }
 
 
@@ -1020,3 +1115,8 @@ void MainWindow::on_pushButton_warp_clicked()
 
     show_cv("warped", imOut, delay);
 }
+
+
+
+
+

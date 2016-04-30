@@ -66,6 +66,7 @@ private:
 
     cv::VideoCapture cap;
     cv::VideoCapture cap2;
+    cv::VideoWriter vidWriter;
 
     int delay;
 
@@ -83,6 +84,10 @@ private:
     int nCorners;
 
     cv::Mat F, H;
+
+    QString mode;
+
+
 
 signals:
     void qInputImageReady();
@@ -183,6 +188,12 @@ private slots:
     void on_pushButton_warp_clicked();
 
     void on_pushButton_homo_clicked();
+
+    void on_pushButton_contours_clicked();
+
+    void on_pushButton_save_clicked();
+
+    void on_pushButton_stopRec_clicked();
 
 public slots:
 

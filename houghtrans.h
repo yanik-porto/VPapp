@@ -12,6 +12,7 @@ private:
 public:
     HoughTrans();
     HoughTrans(const QString &, const int &);
+    HoughTrans(const QString &);
     HoughTrans(const HoughTrans &);
     ~HoughTrans();
 
@@ -23,6 +24,7 @@ public:
 
     void findLines(cv::Mat &, cv::Mat &, int &);
     void findCircles(cv::Mat &, cv::Mat &, int &);
+    void findContour(cv::Mat &, cv::Mat &);
 
     void process(cv::Mat &, cv::Mat &);
 

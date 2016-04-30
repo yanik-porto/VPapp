@@ -153,6 +153,11 @@ void processEngine::addProcess(const QString &str, va_list args)
         method = new HoughTrans( str, thresh );
     }
 
+    if(str.compare("contours")==0)
+    {
+        method = new HoughTrans( str );
+    }
+
     if(str.compare("Harris")==0)    //Do non maximal suppression
     {
         int thresh = va_arg( args, int );

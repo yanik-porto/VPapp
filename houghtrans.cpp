@@ -2,6 +2,8 @@
 
 HoughTrans::HoughTrans()
 {
+    shape = "lines";
+    thresh = 100;
 
 }
 
@@ -9,6 +11,12 @@ HoughTrans::HoughTrans(const QString &str, const int &n)
 {
     shape = str;
     thresh = n;
+}
+
+HoughTrans::HoughTrans(const QString &str)
+{
+    shape = str;
+    thresh = 100;
 }
 
 HoughTrans::HoughTrans(const HoughTrans &hT)
@@ -32,6 +40,11 @@ void HoughTrans::process(cv::Mat &inMat, cv::Mat &outMat)
     if( shape.compare("circles") == 0 )
     {
         findCircles( inMat, outMat, thresh );
+    }
+
+    if( shape.compare("contours") == 0 )
+    {
+        findContour( inMat, outMat );
     }
 }
 
@@ -78,6 +91,17 @@ void HoughTrans::findCircles(cv::Mat &inMat, cv::Mat &outMat, int &n)
         // circle outline
         cv::circle( outMat, center, radius, cv::Scalar(0,0,255), 3, 8, 0 );
      }
+}
+
+void HoughTrans::findContour(cv::Mat &inMat, cv::Mat &outMat)
+{
+    cv::Mat outGray;
+    cv::cvtColor(inMat, outGray, CV_BGR2GRAY );
+    std::vector< std::vector<cv::Point> >	contours;
+    cv::findContours(outGray, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cv::drawContours(outMat, contours, -1, cv::Scalar(255,0,0), 2);
+
+
 }
 
 void HoughTrans::set_shape(const QString &str)
