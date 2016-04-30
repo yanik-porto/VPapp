@@ -206,7 +206,7 @@ void MainWindow::Disable_widgets(const QString &mode)
     else
     {
        ui->pushButton_match->setEnabled(false);
-       ui->pushButton_FundMat->setEnabled(false);
+//       ui->pushButton_FundMat->setEnabled(false);
     }
 
 
@@ -852,13 +852,68 @@ void MainWindow::on_pushButton_FundMat_clicked()
     if(ui->radioButton_ransac->isChecked())
         methodFM = cv::FM_RANSAC;
 
-    cv::Mat F = findFundamentalMat(imgPts1, imgPts2, methodFM, 0.1, 0.99);
+    F = findFundamentalMat(imgPts1, imgPts2, methodFM, 0.1, 0.99);
     cout<<F<<endl;
 }
 
 void MainWindow::on_pushButton_epipol_clicked()
 {
-//    std::vector<cv::Vec<T2,3>> epilines1, epilines2;
+    cv::Mat img1 = procEng->get_originalImg();
+    cv::Mat img2 = procEng2->get_originalImg();
+
+    cv::Mat outImg(img1.rows, img1.cols*2, CV_8UC3);
+    cv::Rect rect1(0,0, img1.cols, img1.rows);
+    cv::Rect rect2(img1.cols, 0, img1.cols, img1.rows);
+
+    cv::Mat imgROI1(outImg, rect1);
+    cv::Mat imgROI2(outImg, rect2);
+    img1.copyTo(imgROI1);
+    img2.copyTo(imgROI2);
+
+    std::vector< cv::Vec<double,3> > epilines1, epilines2;
+    std::vector< cv::Point_<double> >points1, points2;
+
+    vector<cv::KeyPoint> keypoints1, keypoints2;
+    QString method;
+    procEng->getKeypoints(keypoints1, method);
+    procEng2->getKeypoints(keypoints2, method);
+
+    for(unsigned int i=0; i<matches.size(); i++)
+    {
+        points1.push_back(keypoints1[matches[i].queryIdx].pt);
+        points2.push_back(keypoints2[matches[i].trainIdx].pt);
+    }
+
+    cv::computeCorrespondEpilines(points1, 1, F, epilines1);
+    cv::computeCorrespondEpilines(points2, 2, F, epilines2);
+
+    cv::RNG rng(0);
+    float inlierDistance = 5;
+
+    for(size_t i = 0; i<points1.size(); i++)
+    {
+        if(inlierDistance>0)
+        {
+            if(distancePointLine(points1[i], epilines2[i]) > inlierDistance || distancePointLine(points2[i], epilines1[i]) > inlierDistance)
+                continue;
+        }
+
+        cv::Scalar color(rng(256),rng(256),rng(256));
+        cv::line(outImg(rect2),
+              cv::Point(0,-epilines1[i][2]/epilines1[i][1]),
+              cv::Point(img1.cols,-(epilines1[i][2]+epilines1[i][0]*img1.cols)/epilines1[i][1]),
+              color);
+            cv::circle(outImg(rect1), points1[i], 3, color, -1, CV_AA);
+
+        cv::line(outImg(rect1),
+              cv::Point(0,-epilines2[i][2]/epilines2[i][1]),
+              cv::Point(img2.cols,-(epilines2[i][2]+epilines2[i][0]*img2.cols)/epilines2[i][1]),
+              color);
+            cv::circle(outImg(rect2), points2[i], 3, color, -1, CV_AA);
+
+    }
+    cv::imshow("Epipolar lines", outImg);
+    cv::waitKey(1);
 }
 
 void MainWindow::on_pushButton_calib_clicked()
@@ -929,3 +984,39 @@ cv::Mat MainWindow::calibrateAndUndistort(const vector<vector<Point3f> > &object
     return imageUndistorted;
 }
 
+void MainWindow::on_pushButton_homo_clicked()
+{
+    vector<cv::KeyPoint> keypts1, keypts2;
+    QString method1, method2;
+    procEng->getKeypoints(keypts1, method1);
+    procEng2->getKeypoints(keypts2, method2);
+
+
+    vector<Point2f> imgPts1, imgPts2;
+    for(unsigned int i=0; i<matches.size(); i++)
+    {
+        imgPts1.push_back(keypts1[matches[i].queryIdx].pt);
+        imgPts2.push_back(keypts2[matches[i].trainIdx].pt);
+    }
+
+    int methodHM;
+    if(ui->radioButton_allPts->isChecked())
+        methodHM = 0;
+    if(ui->radioButton_ransacH->isChecked())
+        methodHM = CV_RANSAC;
+    if(ui->radioButton_ransac->isChecked())
+        methodHM = CV_LMEDS;
+
+
+    std::vector<uchar>	inliers(imgPts1.size(),0);
+    H = cv::findHomography(imgPts1, imgPts2, inliers, methodHM );
+}
+
+
+void MainWindow::on_pushButton_warp_clicked()
+{
+    cv::Mat imOut;
+    cv::warpPerspective(procEng->get_processedImg(), imOut, H, procEng2->get_originalImg().size());
+
+    show_cv("warped", imOut, delay);
+}

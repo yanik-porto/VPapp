@@ -69,3 +69,11 @@ void getHistogram(const cv::Mat &inMat, cv::Mat histImage[3])
      }
 
 }
+
+//template <typename T>
+float distancePointLine(const cv::Point_<double> point, const cv::Vec<double,3>& line)
+{
+    //Line is given as a*x + b*y + c = 0
+    std::fabs(line(0)*point.x + line(1)*point.y + line(2))
+          / std::sqrt(line(0)*line(0)+line(1)*line(1));
+}

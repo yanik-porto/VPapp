@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "processengine.h"
+#include "imgprocfunctions.h"
 
 #include <QMainWindow>
 #include <QFileDialog>
@@ -80,6 +81,8 @@ private:
     vector< vector<Point3f> > object_points;
     vector< vector<Point2f> > image_points;
     int nCorners;
+
+    cv::Mat F, H;
 
 signals:
     void qInputImageReady();
@@ -176,6 +179,10 @@ private slots:
     void on_pushButton_2hsv_clicked();
 
     void on_pushButton_2gray_clicked();
+
+    void on_pushButton_warp_clicked();
+
+    void on_pushButton_homo_clicked();
 
 public slots:
 
