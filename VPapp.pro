@@ -12,37 +12,38 @@ TARGET = VPapp
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    processengine.cpp \
-    imgprocfunctions.cpp \
-    ipmethod.cpp \
-    sandp.cpp \
-    filters.cpp \
-    derivatives.cpp \
-    featuresPts.cpp \
-    colorbasics.cpp \
-    flipimg.cpp \
-    resizeimg.cpp \
-    houghtrans.cpp \
-    addlogo.cpp
+SOURCES += apps/main.cpp\
+        common/mainwindow.cpp \
+    common/processengine.cpp \
+    common/imgprocfunctions.cpp \
+    common/methods/ipmethod.cpp \
+    common/methods/sandp.cpp \
+    common/methods/filters.cpp \
+    common/methods/derivatives.cpp \
+    common/methods/featuresPts.cpp \
+    common/methods/colorbasics.cpp \
+    common/methods/flipimg.cpp \
+    common/methods/resizeimg.cpp \
+    common/methods/houghtrans.cpp \
+    common/methods/addlogo.cpp
 
-HEADERS  += mainwindow.h \
-    processengine.h \
-    imgprocfunctions.h \
-    ipmethod.h \
-    sandp.h \
-    filters.h \
-    derivatives.h \
-    featuresPts.h \
-    colorbasics.h \
-    flipimg.h \
-    resizeimg.h \
-    houghtrans.h \
-    addlogo.h
+HEADERS  += common/mainwindow.h \
+    common/processengine.h \
+    common/imgprocfunctions.h \
+    common/methods/ipmethod.h \
+    common/methods/sandp.h \
+    common/methods/filters.h \
+    common/methods/derivatives.h \
+    common/methods/featuresPts.h \
+    common/methods/colorbasics.h \
+    common/methods/flipimg.h \
+    common/methods/resizeimg.h \
+    common/methods/houghtrans.h \
+    common/methods/addlogo.h
 
-FORMS    += mainwindow.ui
+FORMS    += common/mainwindow.ui
 
+#Change for your own opencv
 INCLUDEPATH += /usr/local/include
 LIBS += -L"/usr/local/lib"
 LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_videoio -lopencv_features2d -lopencv_xfeatures2d -lopencv_stitching -lopencv_calib3d
