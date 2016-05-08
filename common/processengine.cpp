@@ -269,7 +269,6 @@ void processEngine::getKeypoints(vector<cv::KeyPoint> &keypoints, QString &metho
     vector<ipmethod*>::iterator it;
     for ( it=ipmethodList.begin(); it!=ipmethodList.end(); it++)
     {
-//        if(dynamic_cast<FeaturesPts*>(*it))
         if(featPts)
         {
             cout<<"Features detected"<<endl;
