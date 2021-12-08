@@ -256,6 +256,20 @@ private slots:
 
     void on_pushButton_stopRec_clicked();
 
+    void on_pushButton_updChannels_clicked();
+
+    void on_horizontalSlider_c1_sliderMoved(int position);
+
+    void on_horizontalSlider_c2_sliderMoved(int position);
+
+    void on_horizontalSlider_c3_sliderMoved(int position);
+
+    void on_horizontalSlider_c1_max_sliderMoved(int position);
+
+    void on_horizontalSlider_c2_max_sliderMoved(int position);
+
+    void on_horizontalSlider_c3_max_sliderMoved(int position);
+
 public slots:
 
 

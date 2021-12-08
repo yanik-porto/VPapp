@@ -12,6 +12,7 @@
 #include "methods/resizeimg.h"
 #include "methods/houghtrans.h"
 #include "methods/addlogo.h"
+#include "methods/channelsfilter.h"
 
 #include <QObject>
 #include <QString>

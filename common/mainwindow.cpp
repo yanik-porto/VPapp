@@ -1115,8 +1115,44 @@ cv::Mat MainWindow::calibrateAndUndistort(const vector<vector<Point3f> > &object
     return imageUndistorted;
 }
 
+void MainWindow::on_pushButton_updChannels_clicked()
+{
+    int min1 = ui->horizontalSlider_c1->value();
+    int min2 = ui->horizontalSlider_c2->value();
+    int min3 = ui->horizontalSlider_c3->value();
+    int max1 = ui->horizontalSlider_c1_max->value();
+    int max2 = ui->horizontalSlider_c2_max->value();
+    int max3 = ui->horizontalSlider_c3_max->value();
+    sendProcessRequest( selectImg, "update_channels", min1, min2, min3, max1, max2, max3 );
+    updateListProcess("update_channels " + QString::number(max1) + " " + QString::number(max2) + " " + QString::number(max3) );
+}
 
+void MainWindow::on_horizontalSlider_c1_sliderMoved(int position)
+{
+    ui->label_c1->setText(QString::number(position));
+}
 
+void MainWindow::on_horizontalSlider_c2_sliderMoved(int position)
+{
+    ui->label_c2->setText(QString::number(position));
+}
 
+void MainWindow::on_horizontalSlider_c3_sliderMoved(int position)
+{
+     ui->label_c3->setText(QString::number(position));
+}
 
+void MainWindow::on_horizontalSlider_c1_max_sliderMoved(int position)
+{
+     ui->label_c1_max->setText(QString::number(position));
+}
 
+void MainWindow::on_horizontalSlider_c2_max_sliderMoved(int position)
+{
+    ui->label_c2_max->setText(QString::number(position));
+}
+
+void MainWindow::on_horizontalSlider_c3_max_sliderMoved(int position)
+{
+     ui->label_c1_max->setText(QString::number(position));
+}

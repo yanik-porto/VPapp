@@ -196,6 +196,17 @@ void processEngine::addProcess(const QString &str, va_list args)
         method = featPts;
     }
 
+    if(str.compare("update_channels")==0)
+    {
+        int min1 = va_arg( args, int );
+        int min2 = va_arg( args, int );
+        int min3 = va_arg( args, int );
+        int max1 = va_arg( args, int );
+        int max2 = va_arg( args, int );
+        int max3 = va_arg( args, int );
+        method = new ChannelsFilter(min1, min2, min3, max1, max2, max3);
+    }
+
 
 
     ipmethodList.push_back(method);
