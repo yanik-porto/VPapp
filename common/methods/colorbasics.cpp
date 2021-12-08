@@ -65,17 +65,17 @@ void colorBasics::equalize(cv::Mat &inMat, cv::Mat &outMat)
 
 void colorBasics::convertToRGB(cv::Mat &inMat, cv::Mat &outMat)
 {
-    cv::cvtColor(inMat, outMat, CV_BGR2RGB);
+    cv::cvtColor(inMat, outMat, cv::COLOR_BGR2RGB);
 }
 
 void colorBasics::convertToHSV(cv::Mat &inMat, cv::Mat &outMat)
 {
-    cv::cvtColor(inMat, outMat, CV_BGR2HSV);
+    cv::cvtColor(inMat, outMat, cv::COLOR_BGR2HSV);
 }
 
 void colorBasics::convertToGRAY(cv::Mat &inMat, cv::Mat &outMat)
 {
-    cv::cvtColor(inMat, outMat, CV_BGR2GRAY);
+    cv::cvtColor(inMat, outMat, cv::COLOR_BGR2GRAY);
 }
 
 void colorBasics::set_method(const QString &str)

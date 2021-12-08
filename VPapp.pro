@@ -46,7 +46,7 @@ HEADERS  += common/mainwindow.h \
 FORMS    += common/mainwindow.ui
 
 #Change for your own opencv
-INCLUDEPATH += /usr/local/include
+INCLUDEPATH += /usr/local/include/opencv4
 LIBS += -L"/usr/local/lib"
 LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_videoio -lopencv_features2d -lopencv_xfeatures2d -lopencv_stitching -lopencv_calib3d
 

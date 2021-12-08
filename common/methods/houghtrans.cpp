@@ -52,7 +52,7 @@ void HoughTrans::findLines(cv::Mat &inMat, cv::Mat &outMat, int &n)
 {
     ///Convert image to gray
     cv::Mat outMat_gray;
-    cvtColor(inMat, outMat_gray, CV_BGR2GRAY);
+    cvtColor(inMat, outMat_gray, cv::COLOR_BGR2GRAY);
 
     ///Create vector to store lines
     vector<cv::Vec4i> lines;
@@ -64,7 +64,7 @@ void HoughTrans::findLines(cv::Mat &inMat, cv::Mat &outMat, int &n)
     for( size_t i = 0; i < lines.size(); i++ )
     {
       cv::Vec4i l = lines[i];
-      cv::line( outMat, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 1, CV_AA);
+      cv::line( outMat, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 1, cv::LINE_AA);
     }
 }
 
@@ -72,13 +72,13 @@ void HoughTrans::findCircles(cv::Mat &inMat, cv::Mat &outMat, int &n)
 {
     ///Convert image to gray
     cv::Mat outMat_gray;
-    cvtColor( inMat, outMat_gray, CV_BGR2GRAY);
+    cvtColor( inMat, outMat_gray, cv::COLOR_BGR2GRAY);
 
     ///Create vectors to store x,y and r
     vector<cv::Vec3f> circles;
 
     ///Apply the hough transform to find circles
-    cv::HoughCircles( outMat_gray, circles, CV_HOUGH_GRADIENT, 1, outMat_gray.rows/8, 200, n, 0, 0 ); //Play with parameter 2
+    cv::HoughCircles( outMat_gray, circles, cv::HOUGH_GRADIENT, 1, outMat_gray.rows/8, 200, n, 0, 0 ); //Play with parameter 2
 
     ///Draw detected circles
     for( size_t i = 0; i < circles.size(); i++ )
@@ -95,9 +95,9 @@ void HoughTrans::findCircles(cv::Mat &inMat, cv::Mat &outMat, int &n)
 void HoughTrans::findContour(cv::Mat &inMat, cv::Mat &outMat)
 {
     cv::Mat outGray;
-    cv::cvtColor(inMat, outGray, CV_BGR2GRAY );
+    cv::cvtColor(inMat, outGray, cv::COLOR_BGR2GRAY );
     std::vector< std::vector<cv::Point> >	contours;
-    cv::findContours(outGray, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cv::findContours(outGray, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
     cv::drawContours(outMat, contours, -1, cv::Scalar(255,0,0), 2);
 
 

@@ -46,7 +46,7 @@ void Derivatives::set_method(const QString &str)
 void Derivatives::sobel(cv::Mat &inMat, cv::Mat &outMat)
 {
     /// Convert image to gray
-    cv::cvtColor( inMat, outMat, CV_BGR2GRAY );
+    cv::cvtColor( inMat, outMat, cv::COLOR_BGR2GRAY );
 
     /// Generate gradient images and set parameter of the depth to 16S
     cv::Mat grad_x, grad_y;
@@ -67,7 +67,7 @@ void Derivatives::sobel(cv::Mat &inMat, cv::Mat &outMat)
 void Derivatives::laplacian(cv::Mat & inMat, cv::Mat &outMat)
 {
     /// Convert image to gray
-    cvtColor( inMat, outMat, CV_BGR2GRAY );
+    cvtColor( inMat, outMat, cv::COLOR_BGR2GRAY );
 
     ///Set parameter of the depth to 16S
     int ddepth = CV_16S;
@@ -83,7 +83,7 @@ void Derivatives::laplacian(cv::Mat & inMat, cv::Mat &outMat)
 void Derivatives::canny(cv::Mat & inMat, cv::Mat &outMat)
 {
     /// Convert image to gray
-    cvtColor( inMat, outMat, CV_BGR2GRAY );
+    cvtColor( inMat, outMat, cv::COLOR_BGR2GRAY );
 
     /// Set the parameters
     int lowThresh = 100;
