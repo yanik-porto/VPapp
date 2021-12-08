@@ -14,6 +14,7 @@ TEMPLATE = app
 
 SOURCES += apps/main.cpp\
         common/mainwindow.cpp \
+    common/methods/channelsfilter.cpp \
     common/processengine.cpp \
     common/imgprocfunctions.cpp \
     common/methods/ipmethod.cpp \
@@ -28,6 +29,7 @@ SOURCES += apps/main.cpp\
     common/methods/addlogo.cpp
 
 HEADERS  += common/mainwindow.h \
+    common/methods/channelsfilter.h \
     common/processengine.h \
     common/imgprocfunctions.h \
     common/methods/ipmethod.h \
