@@ -137,13 +137,13 @@ void MainWindow::Display_inImg()
         if(!originalImg.isNull())
             ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
         else
-            ui->label_inputI->setPixmap(NULL);
+            ui->label_inputI->setPixmap(QPixmap());
         break;
     case 2:
         if(!originalImg2.isNull())
             ui->label_inputI->setPixmap(QPixmap::fromImage(originalImg2.scaled(ui->label_inputI->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
         else
-            ui->label_inputI->setPixmap(NULL);
+            ui->label_inputI->setPixmap(QPixmap());
         break;
     default:
         break;
@@ -281,7 +281,7 @@ void MainWindow::on_pushButton_open_clicked()
         mode = "Image";
         ui->label_infos->setText(mode);
 
-        I = imread(filename.toStdString(),CV_LOAD_IMAGE_COLOR);
+        I = imread(filename.toStdString(),cv::IMREAD_COLOR);
         switch(selectImg)
         {
         case 1: procEng->loadImg(I);
@@ -488,9 +488,9 @@ void MainWindow::on_pushButton_save_clicked()
         {
             switch(selectImg)
             {
-            case 1: vidWriter.open(saveFileName.toStdString(), cap.get(CV_CAP_PROP_FOURCC), cap.get(CV_CAP_PROP_FPS), Size(cap.get(CV_CAP_PROP_FRAME_WIDTH), cap.get(CV_CAP_PROP_FRAME_HEIGHT)) );
+            case 1: vidWriter.open(saveFileName.toStdString(), cap.get(cv::CAP_PROP_FOURCC), cap.get(cv::CAP_PROP_FPS), Size(cap.get(cv::CAP_PROP_FRAME_WIDTH), cap.get(cv::CAP_PROP_FRAME_HEIGHT)) );
                 break;
-            case 2: vidWriter.open(saveFileName.toStdString(), cap2.get(CV_CAP_PROP_FOURCC), cap2.get(CV_CAP_PROP_FPS), Size(cap2.get(CV_CAP_PROP_FRAME_WIDTH), cap2.get(CV_CAP_PROP_FRAME_HEIGHT)) );
+            case 2: vidWriter.open(saveFileName.toStdString(), cap2.get(cv::CAP_PROP_FOURCC), cap2.get(cv::CAP_PROP_FPS), Size(cap2.get(cv::CAP_PROP_FRAME_WIDTH), cap2.get(cv::CAP_PROP_FRAME_HEIGHT)) );
                 break;
             default:
                 break;
@@ -841,8 +841,9 @@ void MainWindow::on_pushButton_stitch_clicked()
     vImg.push_back(procEng->get_processedImg());
     vImg.push_back(procEng2->get_processedImg());
 
-    cv::Stitcher stitcher = cv::Stitcher::createDefault();
-    cv::Stitcher::Status status = stitcher.stitch( vImg, rImg);
+//    cv::Stitcher stitcher = cv::Stitcher::createDefault();
+    auto stitcher = cv::Stitcher::create();
+    cv::Stitcher::Status status = stitcher->stitch( vImg, rImg);
 
     if(cv::Stitcher::OK == status)
     {
@@ -1018,9 +1019,9 @@ void MainWindow::on_pushButton_homo_clicked()
     if(ui->radioButton_allPts->isChecked())
         methodHM = 0;
     if(ui->radioButton_ransacH->isChecked())
-        methodHM = CV_RANSAC;
+        methodHM = cv::RANSAC;
     if(ui->radioButton_ransac->isChecked())
-        methodHM = CV_LMEDS;
+        methodHM = cv::LMEDS;
 
 
     std::vector<uchar>	inliers(imgPts1.size(),0);
@@ -1074,8 +1075,8 @@ bool MainWindow::findCorners(vector<vector<Point3f> > &object_points, vector<vec
     for(int j=0;j<numSquares;j++)
         obj.push_back(cv::Point3f(j/numCornersHor, j%numCornersHor, 0.0f));
 
-    cv::cvtColor(image, gray_image, CV_BGR2GRAY);
-    bool found = cv::findChessboardCorners(image, board_sz, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS );
+    cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
+    bool found = cv::findChessboardCorners(image, board_sz, corners, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FILTER_QUADS );
 
     if(found)
     {
@@ -1154,5 +1155,5 @@ void MainWindow::on_horizontalSlider_c2_max_sliderMoved(int position)
 
 void MainWindow::on_horizontalSlider_c3_max_sliderMoved(int position)
 {
-     ui->label_c1_max->setText(QString::number(position));
+     ui->label_c3_max->setText(QString::number(position));
 }

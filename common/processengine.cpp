@@ -1,5 +1,6 @@
 #include "processengine.h"
 
+#include <opencv2/imgproc.hpp>
 /**
  * constructor and destructor of the class
  */
@@ -33,7 +34,7 @@ void processEngine::changeToBGR()
 {
     if(outI.type()==0)
     {
-        cv::cvtColor(outI, outI, CV_GRAY2BGR);
+        cv::cvtColor(outI, outI, cv::COLOR_GRAY2BGR);
     }
 }
 

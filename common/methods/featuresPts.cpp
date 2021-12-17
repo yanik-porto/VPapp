@@ -49,7 +49,7 @@ void FeaturesPts::Harris_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
 {
         ///Convert image to gray
         cv::Mat outMat_gray, corners, corners_scaled;
-        cvtColor(inMat, outMat_gray, CV_BGR2GRAY);
+        cvtColor(inMat, outMat_gray, cv::COLOR_BGR2GRAY);
 
         ///Detector Parameters
         int blockSize = 2;
@@ -96,7 +96,7 @@ void FeaturesPts::SIFT_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
 void FeaturesPts::FAST_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
 {
     cv::Mat outMat_gray;
-    cv::cvtColor( inMat, outMat_gray, CV_BGR2GRAY);
+    cv::cvtColor( inMat, outMat_gray, cv::COLOR_BGR2GRAY);
 
     cv::FAST(outMat_gray, keypoints, n, true);
 
