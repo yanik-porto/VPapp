@@ -1155,5 +1155,5 @@ void MainWindow::on_horizontalSlider_c2_max_sliderMoved(int position)
 
 void MainWindow::on_horizontalSlider_c3_max_sliderMoved(int position)
 {
-     ui->label_c1_max->setText(QString::number(position));
+     ui->label_c3_max->setText(QString::number(position));
 }
