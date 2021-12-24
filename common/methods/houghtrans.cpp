@@ -48,6 +48,11 @@ void HoughTrans::process(cv::Mat &inMat, cv::Mat &outMat)
     }
 }
 
+QString HoughTrans::toStr()
+{
+    return "hough transform";
+}
+
 void HoughTrans::findLines(cv::Mat &inMat, cv::Mat &outMat, int &n)
 {
     ///Convert image to gray

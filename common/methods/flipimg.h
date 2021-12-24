@@ -18,6 +18,8 @@ public:
     const int &get_flipcode() const {return flipCode;}
 
     void process(cv::Mat &, cv::Mat &);
+
+    QString toStr() override;
 };
 
 #endif // FLIPIMG_H

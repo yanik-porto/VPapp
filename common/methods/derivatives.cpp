@@ -94,3 +94,8 @@ void Derivatives::canny(cv::Mat & inMat, cv::Mat &outMat)
     cv::Canny( outMat, outMat, lowThresh, lowThresh*ratio );
 }
 
+QString Derivatives::toStr()
+{
+    return "derivatives";
+}
+

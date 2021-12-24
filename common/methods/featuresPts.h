@@ -16,7 +16,7 @@ public:
     FeaturesPts();
     FeaturesPts(const QString &, int &);
     FeaturesPts(const FeaturesPts &);
-    ~FeaturesPts();
+    virtual ~FeaturesPts();
 
     void set_method(const QString &);
     void set_thresh(const int &);
@@ -31,6 +31,8 @@ public:
     void SURF_keypts(cv::Mat &, cv::Mat &, const int &);
     void SIFT_keypts(cv::Mat &, cv::Mat &, const int &);
     void FAST_keypts(cv::Mat &, cv::Mat &, const int &);
+
+    QString toStr() override;
 };
 
 #endif // FEATURES_H

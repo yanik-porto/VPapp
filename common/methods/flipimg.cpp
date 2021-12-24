@@ -25,6 +25,11 @@ void flipImg::process(cv::Mat &inMat, cv::Mat &outMat)
     cv::flip( inMat, outMat, flipCode );
 }
 
+QString flipImg::toStr()
+{
+    return "flip img";
+}
+
 void flipImg::set_flipcode(const int &n)
 {
     flipCode = n;

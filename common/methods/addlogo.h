@@ -18,6 +18,8 @@ public:
     const QString &get_logoPath() const {return logoPath;}
 
     void process(cv::Mat &, cv::Mat &);
+
+    QString toStr() override;
 };
 
 #endif // ADDLOGO_H

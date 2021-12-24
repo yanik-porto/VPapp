@@ -56,6 +56,11 @@ void Filters::process(cv::Mat &inMat, cv::Mat &outMat)
     }
 }
 
+QString Filters::toStr()
+{
+    return "filters";
+}
+
 void Filters::set_sizeKernel(const int &sz)
 {
     sizeKernel = sz;

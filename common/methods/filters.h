@@ -27,6 +27,8 @@ public:
     void blur( cv::Mat inMat, cv::Mat outMat, int sz);
 
     void process(cv::Mat &, cv::Mat &);
+
+    QString toStr() override;
 };
 
 #endif // FILTERS_H

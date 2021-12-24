@@ -12,6 +12,8 @@ public:
     void process(cv::Mat &, cv::Mat &) override;
 
     void add(int min1, int min2, int min3, int max1, int max2, int max3, int mode);
+
+    QString toStr() override;
 private:
     struct Filter {
         Filter(int min1, int min2, int min3, int max1, int max2, int max3, int mode) {

@@ -22,6 +22,8 @@ public:
 
     void process(cv::Mat &, cv::Mat & );
 
+    QString toStr() override;
+
 };
 
 #endif // RESIZEIMG_H

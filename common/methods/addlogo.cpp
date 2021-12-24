@@ -30,6 +30,11 @@ void AddLogo::process(cv::Mat &inMat, cv::Mat &outMat)
     logo.copyTo( imgROI );
 }
 
+QString AddLogo::toStr()
+{
+    return "add logo";
+}
+
 void AddLogo::set_logoPath(const QString &filename)
 {
     logoPath = filename;

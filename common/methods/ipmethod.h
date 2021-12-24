@@ -16,9 +16,11 @@ class ipmethod
 {
 public:
     ipmethod();
-    ~ipmethod();
+    virtual ~ipmethod();
 
     virtual void process(cv::Mat&, cv::Mat&) = 0;
+
+    virtual QString toStr() = 0;
 };
 
 #endif // IPMETHOD_H

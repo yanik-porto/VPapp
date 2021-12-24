@@ -48,6 +48,11 @@ void colorBasics::process(cv::Mat &inMat, cv::Mat &outMat)
     }
 }
 
+QString colorBasics::toStr()
+{
+    return "colorBasic";
+}
+
 void colorBasics::invert(cv::Mat &inMat, cv::Mat &outMat)
 {
     outMat = cv::Scalar::all(255) - inMat;

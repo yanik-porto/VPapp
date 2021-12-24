@@ -81,4 +81,9 @@ void SandP::process(cv::Mat &inMat, cv::Mat &outMat)
 
 }
 
+QString SandP::toStr()
+{
+    return "salt and pepper";
+}
+
 

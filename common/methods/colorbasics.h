@@ -23,7 +23,9 @@ public:
     void convertToHSV( cv::Mat &, cv::Mat & );
     void convertToGRAY( cv::Mat &, cv::Mat & );
 
-    void process(cv::Mat &, cv::Mat &);
+    void process(cv::Mat &, cv::Mat &) override;
+
+    QString toStr() override;
 };
 
 #endif // COLORBASICS_H

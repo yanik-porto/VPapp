@@ -22,6 +22,8 @@ public:
     void laplacian( cv::Mat &, cv::Mat &);
     void canny( cv::Mat &, cv::Mat &);
 
+    QString toStr() override;
+
 };
 
 #endif // DERIVATIVES_H

@@ -28,6 +28,11 @@ void resizeImg::process(cv::Mat &inMat, cv::Mat &outMat)
     cv::resize( inMat, outMat, size );
 }
 
+QString resizeImg::toStr()
+{
+    return "resize image";
+}
+
 void resizeImg::set_width(const int &w)
 {
     width = w;

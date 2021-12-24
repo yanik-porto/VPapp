@@ -103,6 +103,11 @@ void FeaturesPts::FAST_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
     cv::drawKeypoints( inMat, keypoints, outMat, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 }
 
+QString FeaturesPts::toStr()
+{
+    return "feature pts";
+}
+
 void FeaturesPts::set_method(const QString &str)
 {
    method = str;

@@ -37,4 +37,7 @@ void ChannelsFilter::add(int min1, int min2, int min3, int max1, int max2, int m
     filters.push_back(Filter(min1, min2, min3, max1, max2, max3, mode));
 }
 
+QString ChannelsFilter::toStr()
+{
+    return "channels filter";
 }
