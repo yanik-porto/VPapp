@@ -112,6 +112,29 @@ void MainWindow::updateListProcess(const QString &str)
     }
 }
 
+void MainWindow::updateListProcess()
+{
+    auto updateWidget = [](const processEngine * const engine, QListWidget* listWidget) {
+        listWidget->clear();
+        for (auto const &process : engine->getProcessList()) {
+            listWidget->addItem(process->toStr());
+        }
+        listWidget->setCurrentRow( listWidget->count() - 1 );
+    };
+
+    switch(selectImg)
+    {
+    case 1:
+        updateWidget(procEng, ui->listWidget_process);
+        break;
+    case 2:
+        updateWidget(procEng2, ui->listWidget_process_2);
+        break;
+    default:
+        break;
+    }
+}
+
 /**
  * Function for displaying images
  */
@@ -1124,8 +1147,17 @@ void MainWindow::on_pushButton_updChannels_clicked()
     int max1 = ui->horizontalSlider_c1_max->value();
     int max2 = ui->horizontalSlider_c2_max->value();
     int max3 = ui->horizontalSlider_c3_max->value();
-    sendProcessRequest( selectImg, "update_channels", min1, min2, min3, max1, max2, max3 );
-    updateListProcess("update_channels " + QString::number(max1) + " " + QString::number(max2) + " " + QString::number(max3) );
+
+    int mode = -1;
+    if (ui->radioButton_modeAnd->isChecked()) {
+        mode = 0;
+    }
+    if (ui->radioButton_modeOr->isChecked()) {
+        mode = 1;
+    }
+
+    sendProcessRequest( selectImg, "update_channels", min1, min2, min3, max1, max2, max3, mode );
+    updateListProcess();
 }
 
 void MainWindow::on_horizontalSlider_c1_sliderMoved(int position)

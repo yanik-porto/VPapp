@@ -4,42 +4,37 @@ ChannelsFilter::ChannelsFilter()
 {
 }
 
-ChannelsFilter::ChannelsFilter(int min1, int min2, int min3, int max1, int max2, int max3)
-{
-    _min1 = min1;
-    _min2 = min2;
-    _min3 = min3;
-    _max1 = max1;
-    _max2 = max2;
-    _max3 = max3;
-}
-
 ChannelsFilter::~ChannelsFilter()
 {
 }
 
 void ChannelsFilter::process(cv::Mat &inMat, cv::Mat &outMat)
 {
-    cv::Mat mask;
-    cv::inRange(inMat, cv::Scalar(_min1, _min2, _min3), cv::Scalar(_max1, _max2, _max3), mask);
-    cv::cvtColor(mask,mask,cv::COLOR_GRAY2BGR);
-    cv::bitwise_and(inMat, mask, outMat);
+    cv::Mat finalMask;
+    for (auto f : filters) {
+        cv::Mat mask;
+        cv::inRange(inMat, cv::Scalar(f._min1, f._min2, f._min3), cv::Scalar(f._max1, f._max2, f._max3), mask);
+        if (finalMask.empty()) {
+            finalMask = mask;
+        }
+        else {
+            if (f._mode == 0) {
+                cv::bitwise_and(finalMask, mask, finalMask);
+            }
+            else {
+                cv::bitwise_or(finalMask, mask, finalMask);
+            }
+        }
+    }
 
-//    cv::Mat image = inMat;
-//    for(int y=0;y<image.rows;y++) {
-//        for(int x=0;x<image.cols;x++){
-//            cv::Vec3b &color = image.at<cv::Vec3b>(y, x);
-//            if (color[0] <= _max1) {
-//                color[0] = 0;
-//            }
-//            if (color[1] <= _max2) {
-//                color[1] = 0;
-//            }
-//            if (color[2] <= _max3) {
-//                color[2] = 0;
-//            }
-//        }
-//    }
-//    outMat = image;
+    cv::Mat outBlank(inMat.size(), inMat.type(), cv::Scalar(0));
+    inMat.copyTo(outBlank, finalMask);
+    outMat = outBlank;
+}
+
+void ChannelsFilter::add(int min1, int min2, int min3, int max1, int max2, int max3, int mode)
+{
+    filters.push_back(Filter(min1, min2, min3, max1, max2, max3, mode));
+}
 
 }

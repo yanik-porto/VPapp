@@ -4,14 +4,16 @@
 /**
  * constructor and destructor of the class
  */
-processEngine::processEngine(QObject *parent) : QObject(parent)
+processEngine::processEngine(QObject *parent) : QObject(parent),
+    featPts(nullptr),
+    channelsFilter(nullptr)
 {
-    featPts = new FeaturesPts();
+//    featPts = new FeaturesPts();
 }
 
 processEngine::~processEngine()
 {
-
+    this->reset();
 }
 
 /**
@@ -45,7 +47,7 @@ void processEngine::addProcess(const QString &str, va_list args)
 {
 
     //Instantiate empty method
-    ipmethod *method;
+    ipmethod *method = nullptr;
 
     //Check which kind of method to add to the list (downgrade to mother class)
     if(str.compare("flip")==0)
@@ -199,18 +201,26 @@ void processEngine::addProcess(const QString &str, va_list args)
 
     if(str.compare("update_channels")==0)
     {
+
         int min1 = va_arg( args, int );
         int min2 = va_arg( args, int );
         int min3 = va_arg( args, int );
         int max1 = va_arg( args, int );
         int max2 = va_arg( args, int );
         int max3 = va_arg( args, int );
-        method = new ChannelsFilter(min1, min2, min3, max1, max2, max3);
+        int mode = va_arg( args, int );
+
+        if (channelsFilter == nullptr) {
+            channelsFilter = new ChannelsFilter();
+            method = channelsFilter;
+        }
+
+        channelsFilter->add(min1, min2, min3, max1, max2, max3, mode);
     }
 
-
-
-    ipmethodList.push_back(method);
+    if (method != nullptr) {
+        ipmethodList.push_back(method);
+    }
 
     va_end(args);
 
@@ -258,10 +268,13 @@ void processEngine::process()
 void processEngine::reset()
 {
     outI = inI.clone();
-    if (!ipmethodList.empty()){
-        ipmethodList.clear();
-        process();
+    for ( auto it=ipmethodList.begin(); it!=ipmethodList.end();) {
+        it = ipmethodList.erase(it);
     }
+    process();
+
+    featPts = nullptr;
+    channelsFilter = nullptr;
 }
 
 /**
@@ -269,6 +282,15 @@ void processEngine::reset()
  */
 void processEngine::removeMethod(const int &ind)
 {
+    ipmethod *pointer = *(ipmethodList.begin() + ind);
+    if (pointer == featPts) {
+        featPts = nullptr;
+    }
+    if (pointer == channelsFilter) {
+        channelsFilter = nullptr;
+    }
+    delete pointer;
+
     ipmethodList.erase( ipmethodList.begin() + ind );
     process();
 }
@@ -278,19 +300,18 @@ void processEngine::removeMethod(const int &ind)
  */
 void processEngine::getKeypoints(vector<cv::KeyPoint> &keypoints, QString &method)
 {
-    vector<ipmethod*>::iterator it;
-    for ( it=ipmethodList.begin(); it!=ipmethodList.end(); it++)
+    if(featPts)
     {
-        if(featPts)
-        {
-            cout<<"Features detected"<<endl;
-            keypoints = featPts->get_keypoints();
-            method = featPts->get_method();
-        }
-
-        else
-            cout<<"No features detected"<<endl;
+        cout<<"Features detected"<<endl;
+        keypoints = featPts->get_keypoints();
+        method = featPts->get_method();
     }
 
+    else
+        cout<<"No features detected"<<endl;
+}
 
+const std::vector<ipmethod *> processEngine::getProcessList() const
+{
+    return ipmethodList;
 }

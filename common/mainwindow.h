@@ -140,6 +140,11 @@ public:
     void updateListProcess(const QString &);
 
     /**
+     * update the name of all process inside the list of the gui
+     */
+    void updateListProcess();
+
+    /**
      * Find the corners of the checkerboard patter for the calibration
      */
     bool findCorners(vector< vector<Point3f> > &object_points, vector< vector<Point2f> > &image_points, Mat image);

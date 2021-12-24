@@ -51,6 +51,11 @@ private:
      */
     FeaturesPts *featPts;
 
+    /**
+     * method containing channels filter
+     */
+    ChannelsFilter *channelsFilter;
+
 public:
 
     /**
@@ -102,6 +107,11 @@ public:
      */
     void getKeypoints(vector<cv::KeyPoint> &, QString &);
 
+    /**
+     * @brief get the list of process
+     * @return The list of process as const
+     */
+    const std::vector<ipmethod*> getProcessList() const;
 
 signals:
     /**
