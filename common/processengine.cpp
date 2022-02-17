@@ -282,16 +282,18 @@ void processEngine::reset()
  */
 void processEngine::removeMethod(const int &ind)
 {
-    ipmethod *pointer = *(ipmethodList.begin() + ind);
-    if (pointer == featPts) {
-        featPts = nullptr;
+    if (ipmethodList.size() > 0) {
+        ipmethod *pointer = *(ipmethodList.begin() + ind);
+        if (pointer == featPts) {
+            featPts = nullptr;
+        }
+        if (pointer == channelsFilter) {
+            channelsFilter = nullptr;
+        }
+        delete pointer;
+        ipmethodList.erase( ipmethodList.begin() + ind );
     }
-    if (pointer == channelsFilter) {
-        channelsFilter = nullptr;
-    }
-    delete pointer;
 
-    ipmethodList.erase( ipmethodList.begin() + ind );
     process();
 }
 
