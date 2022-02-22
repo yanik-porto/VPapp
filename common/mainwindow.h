@@ -117,10 +117,25 @@ private:
     cv::Mat F, H;
 
     /**
+     * static attributes for mouse events
+     */
+    static cv::Point p1;
+    static cv::Point p2;
+    static bool lineOver;
+    static bool lineDrawing;
+
+    /**
      * function for opening a window, calling show and waitkey at the same time
      */
     int show_cv(const String &winname, const Mat &image, const int &delay);
 
+    void dispHistImages(cv::Mat histImage[3]);
+
+    void fillHistogram(const cv::Rect& roi = cv::Rect());
+
+    void fillProfile(const cv::Point &p1, const cv::Point &p2);
+
+    static void onMouseCvImg(int event, int x, int y, int f, void *);
 public:
 
     /**
@@ -274,6 +289,10 @@ private slots:
     void on_horizontalSlider_c2_max_sliderMoved(int position);
 
     void on_horizontalSlider_c3_max_sliderMoved(int position);
+
+    void on_pushButton_area_clicked();
+
+    void on_pushButton_profile_clicked();
 
 public slots:
 

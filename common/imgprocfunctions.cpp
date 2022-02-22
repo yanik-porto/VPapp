@@ -43,6 +43,35 @@ void getHistogram(const cv::Mat &inMat, cv::Mat histImage[3])
                           cv::Point( bin_w*(i), hist_h - cvRound(r_hist.at<float>(i)) ),
                           cv::Scalar( 0, 0, 255), 2, 8, 0  );
      }
+}
+
+void getProfile(const cv::Mat &inMat, const cv::Point &p1, const cv::Point &p2, cv::Mat histImage[3])
+{
+    cv::LineIterator lineIt(inMat, p1, p2, 8);
+    std::vector<cv::Vec3b> buf(static_cast<size_t>(lineIt.count));
+    for(size_t i = 0; i < lineIt.count; i++, ++lineIt) {
+        buf[i] = *(const cv::Vec3b*)*lineIt;
+    }
+
+    size_t histWidth = static_cast<size_t>(histImage[0].cols);
+    size_t histHeight = static_cast<size_t>(histImage[0].rows);
+    int b0 = 0;
+    int g0 = 0;
+    int r0 = 0;
+    for (size_t i = 0; i < histWidth; i++) {
+        size_t bufIdx = static_cast<size_t>(i / static_cast<float>(histWidth) * buf.size());
+        int b1 = static_cast<int>(buf[bufIdx][0] / 255.f * histHeight);
+        int g1 = static_cast<int>(buf[bufIdx][1] / 255.f * histHeight);
+        int r1 = static_cast<int>(buf[bufIdx][2] / 255.f * histHeight);
+        if (i > 0) {
+            cv::line(histImage[0], cv::Point(i-1, b0), cv::Point(i, b1), cv::Scalar(255, 0, 0), 2);
+            cv::line(histImage[1], cv::Point(i-1, g0), cv::Point(i, g1), cv::Scalar(0, 255, 0), 2);
+            cv::line(histImage[2], cv::Point(i-1, r0), cv::Point(i, r1), cv::Scalar(0, 0, 255), 2);
+        }
+        b0 = b1;
+        g0 = g1;
+        r0 = r1;
+    }
 
 }
 

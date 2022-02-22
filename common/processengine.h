@@ -78,7 +78,12 @@ public:
     /**
      * compute the histogram of every channel and store the in the input matrices
      */
-    void computeHist(cv::Mat histImage[3]);
+    void computeHist(cv::Mat histImage[3], const cv::Rect& roi = cv::Rect());
+
+    /**
+     * compute the profile along a given line
+     */
+    void computeProfile(cv::Mat histImage[3], const cv::Point &p1, const cv::Point &p2);
 
     /**
      * Accessors

@@ -231,7 +231,7 @@ void processEngine::addProcess(const QString &str, va_list args)
 /**
  * compute the histogram of every channel and store the in the input matrices
  */
-void processEngine::computeHist(cv::Mat histImage[3])
+void processEngine::computeHist(cv::Mat histImage[3], const cv::Rect& roi/* = cv::Rect()*/)
 {
     ///initialize the histograms for B, G and R
    int hist_w = 512; int hist_h = 400;
@@ -241,8 +241,30 @@ void processEngine::computeHist(cv::Mat histImage[3])
    histImage[2] = cv::Mat( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
 
    ///Fill the matrices
-   getHistogram(outI, histImage);
+   if (roi.empty()) {
+       getHistogram(outI, histImage);
+   }
+   else {
+       getHistogram(outI(roi), histImage);
+   }
 }
+
+/**
+ * compute the profile along a given line
+ */
+void processEngine::computeProfile(cv::Mat histImage[3], const cv::Point &p1, const cv::Point &p2)
+{
+    ///initialize the histograms for B, G and R
+   int hist_w = 512; int hist_h = 400;
+
+   histImage[0] = cv::Mat( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
+   histImage[1] = cv::Mat( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
+   histImage[2] = cv::Mat( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
+
+    getProfile(outI, p1, p2, histImage);
+}
+
+
 
 /**
  * function which executes all methods in the list

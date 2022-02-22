@@ -148,6 +148,46 @@ int MainWindow::show_cv(const String &winname,const Mat &image, const int &delay
     return ch;
 }
 
+void MainWindow::dispHistImages(cv::Mat histImage[3]) {
+
+    for(int i=0; i<3; i++)
+    {
+        cv::cvtColor(histImage[i], histImage[i], CV_BGR2RGB);
+    }
+
+    QImage histR((const unsigned char*)(histImage[2].data), histImage[2].cols,  histImage[2].rows, QImage::Format_RGB888);
+    ui->label_histR->setPixmap(QPixmap::fromImage(histR.scaled(ui->label_histR->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+
+    QImage histG((const unsigned char*)(histImage[1].data), histImage[1].cols,  histImage[1].rows, QImage::Format_RGB888);
+    ui->label_histG->setPixmap(QPixmap::fromImage(histG.scaled(ui->label_histG->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+
+    QImage histB((const unsigned char*)(histImage[0].data), histImage[0].cols,  histImage[0].rows, QImage::Format_RGB888);
+    ui->label_histB->setPixmap(QPixmap::fromImage(histB.scaled(ui->label_histB->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+}
+
+void MainWindow::fillHistogram(const Rect &roi/*= cv::Rect()*/)
+{
+    ///Instantiate the matrices
+    cv::Mat histImages[3];
+
+    processEngine *engine = selectImg == 1 ? procEng : procEng2;
+
+    engine->computeHist(histImages, roi);
+
+
+    this->dispHistImages(histImages);
+}
+
+void MainWindow::fillProfile(const cv::Point &p1, const cv::Point &p2)
+{
+    cv::Mat histImages[3];
+
+    processEngine *engine = selectImg == 1 ? procEng : procEng2;
+    engine->computeProfile(histImages, p1, p2);
+
+    this->dispHistImages(histImages);
+}
+
 /**
  * Slots called by processengine class signals
  */
@@ -571,33 +611,7 @@ void MainWindow::on_pushButton_rmv_clicked()
  */
 void MainWindow::on_pushButton_hist_clicked()
 {
-    ///Instantiate the matrices
-    cv::Mat histImage[3];
-
-    ///Get the histograms from processEngine class
-    switch(selectImg)
-    {
-    case 1:procEng->computeHist(histImage);
-        break;
-    case 2:procEng2->computeHist(histImage);
-        break;
-    default:
-        break;
-    }
-
-    for(int i=0; i<3; i++)
-    {
-        cv::cvtColor(histImage[i], histImage[i], CV_BGR2RGB);
-    }
-
-    QImage histR((const unsigned char*)(histImage[2].data), histImage[2].cols,  histImage[2].rows, QImage::Format_RGB888);
-    ui->label_histR->setPixmap(QPixmap::fromImage(histR.scaled(ui->label_histR->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
-
-    QImage histG((const unsigned char*)(histImage[1].data), histImage[1].cols,  histImage[1].rows, QImage::Format_RGB888);
-    ui->label_histG->setPixmap(QPixmap::fromImage(histG.scaled(ui->label_histG->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
-
-    QImage histB((const unsigned char*)(histImage[0].data), histImage[0].cols,  histImage[0].rows, QImage::Format_RGB888);
-    ui->label_histB->setPixmap(QPixmap::fromImage(histB.scaled(ui->label_histB->size(), Qt::KeepAspectRatio, Qt::FastTransformation)));
+    this->fillHistogram();
 }
 
 /**
@@ -1188,4 +1202,84 @@ void MainWindow::on_horizontalSlider_c2_max_sliderMoved(int position)
 void MainWindow::on_horizontalSlider_c3_max_sliderMoved(int position)
 {
      ui->label_c3_max->setText(QString::number(position));
+}
+
+void MainWindow::on_pushButton_area_clicked()
+{
+    switch(selectImg)
+    {
+    case 1:
+    {
+        cv::Rect roi = cv::selectROI(outFrame, procEng->get_processedImg(), false);
+        if (!roi.empty()) {
+            this->fillHistogram(roi);
+        }
+        break;
+    }
+    case 2:
+    {
+        cv::Rect roi = cv::selectROI(outFrame2, procEng2->get_processedImg(), false);
+        if (!roi.empty()) {
+            this->fillHistogram(roi);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+cv::Point MainWindow::p1;
+cv::Point MainWindow::p2;
+bool MainWindow::lineOver = false;
+bool MainWindow::lineDrawing = false;
+void MainWindow::onMouseCvImg( int event, int x, int y, int /*f*/, void* ){
+    switch(event){
+    case cv::EVENT_LBUTTONDOWN :
+        p1.x=x;
+        p1.y=y;
+        lineDrawing = true;
+        break;
+    case  cv::EVENT_LBUTTONUP :
+        p2.x=x;
+        p2.y=y;
+        lineOver = true;
+        lineDrawing = false;
+        break;
+    case cv::EVENT_MOUSEMOVE :
+        if (lineDrawing ) {
+            p2.x=x;
+            p2.y=y;
+        }
+        break;
+    default :
+        break;
+    }
+}
+
+void MainWindow::on_pushButton_profile_clicked()
+{
+    std::string winName = selectImg == 1 ? outFrame : outFrame2;
+
+    cv::setMouseCallback(winName, MainWindow::onMouseCvImg, nullptr);
+    cv::Mat img = selectImg == 1 ? procEng->get_processedImg() : procEng2->get_processedImg();
+    cv::imshow(winName, img);
+    while(true) {
+        cv::waitKey(1);
+        if (MainWindow::lineOver) {
+            break;
+        }
+        if (MainWindow::lineDrawing ) {
+            cv::Mat imgCopy = img.clone();
+            cv::line(imgCopy, MainWindow::p1, MainWindow::p2, cv::Scalar(0, 0, 255), 2);
+            cv::imshow(winName, imgCopy);
+        }
+    }
+
+    this->fillProfile(MainWindow::p1, MainWindow::p2);
+    MainWindow::lineOver = false;
+    MainWindow::lineDrawing = false;
+
+    MainWindow::p1 = cv::Point();
+    MainWindow::p2 = cv::Point();
 }
