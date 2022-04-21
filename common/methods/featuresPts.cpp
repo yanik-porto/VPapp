@@ -86,7 +86,7 @@ void FeaturesPts::SURF_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
 
 void FeaturesPts::SIFT_keypts(cv::Mat &inMat, cv::Mat &outMat, const int &n)
 {
-    cv::Ptr<cv::Feature2D> f2d = SIFT::create( n );
+    cv::Ptr<cv::Feature2D> f2d = cv::SIFT::create( n );
 
     f2d->detect( inMat, keypoints );
 

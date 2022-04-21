@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <opencv2/core/types.hpp>
+
 /**
  * Constructor and Destructor
  */
@@ -332,7 +334,7 @@ void MainWindow::on_pushButton_webcam_clicked()
             detectedCorners = false;
 
             procEng->loadImg(frame);
-            cv::cvtColor( frame, frame, CV_BGR2RGB );
+            cv::cvtColor( frame, frame, cv::COLOR_BGR2RGB );
             originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
             qInputImageReady();
             ch = cv::waitKey(delay);
@@ -369,7 +371,7 @@ void MainWindow::on_pushButton_webcam_clicked()
             detectedCorners = false;
 
             procEng2->loadImg(frame);
-            cv::cvtColor( frame, frame, CV_BGR2RGB );
+            cv::cvtColor( frame, frame, cv::COLOR_BGR2RGB );
             originalImg2=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
             qInputImageReady();
             ch = cv::waitKey(delay);
@@ -428,7 +430,7 @@ void MainWindow::on_pushButton_video_clicked()
                 mode = "Stream";
                 ui->label_infos->setText("Stream");
                 procEng->loadImg(frame);
-                cv::cvtColor( frame, frame, CV_BGR2RGB );
+                cv::cvtColor( frame, frame, cv::COLOR_BGR2RGB );
                 originalImg=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
                 qInputImageReady();
                 if (ch == 27)
@@ -445,7 +447,7 @@ void MainWindow::on_pushButton_video_clicked()
                 mode = "Stream";
                 ui->label_infos->setText("Stream");
                 procEng2->loadImg(frame);
-                cv::cvtColor( frame, frame, CV_BGR2RGB );
+                cv::cvtColor( frame, frame, cv::COLOR_BGR2RGB );
                 originalImg2=QImage((const unsigned char*)(frame.data), frame.cols,  frame.rows, QImage::Format_RGB888);
                 qInputImageReady();
                 ch = cv::waitKey(delay);
@@ -564,7 +566,7 @@ void MainWindow::on_pushButton_hist_clicked()
 
     for(int i=0; i<3; i++)
     {
-        cv::cvtColor(histImage[i], histImage[i], CV_BGR2RGB);
+        cv::cvtColor(histImage[i], histImage[i], cv::COLOR_BGR2RGB);
     }
 
     QImage histR((const unsigned char*)(histImage[2].data), histImage[2].cols,  histImage[2].rows, QImage::Format_RGB888);
@@ -987,13 +989,13 @@ void MainWindow::on_pushButton_epipol_clicked()
               cv::Point(0,-epilines1[i][2]/epilines1[i][1]),
               cv::Point(img1.cols,-(epilines1[i][2]+epilines1[i][0]*img1.cols)/epilines1[i][1]),
               color);
-            cv::circle(outImg(rect1), points1[i], 3, color, -1, CV_AA);
+            cv::circle(outImg(rect1), points1[i], 3, color, -1, cv::LINE_AA);
 
         cv::line(outImg(rect1),
               cv::Point(0,-epilines2[i][2]/epilines2[i][1]),
               cv::Point(img2.cols,-(epilines2[i][2]+epilines2[i][0]*img2.cols)/epilines2[i][1]),
               color);
-            cv::circle(outImg(rect2), points2[i], 3, color, -1, CV_AA);
+            cv::circle(outImg(rect2), points2[i], 3, color, -1, cv::LINE_AA);
 
     }
     cv::imshow("Epipolar lines", outImg);
@@ -1080,7 +1082,7 @@ bool MainWindow::findCorners(vector<vector<Point3f> > &object_points, vector<vec
 
     if(found)
     {
-        cv::cornerSubPix(gray_image, corners, cv::Size(11, 11), cv::Size(-1,-1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.01));
+        cv::cornerSubPix(gray_image, corners, cv::Size(11, 11), cv::Size(-1,-1), cv::TermCriteria(cv::TermCriteria::Type::EPS | cv::TermCriteria::Type::MAX_ITER, 30, 0.01));
         cv::drawChessboardCorners(gray_image, board_sz, corners, found);
     }
 
